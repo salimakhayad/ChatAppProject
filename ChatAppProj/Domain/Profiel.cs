@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using ChatAppProj.Domain;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -8,12 +9,17 @@ using System.Threading.Tasks;
 
 namespace ChatApp.Domain
 {
-    public class Profiel
+    public class Profiel : IdentityUser
     {
-        [Key]
-        public string UserId { get; set; }
+        public Profiel()
+        {
+            
+        }
+        public Profiel(string naam)
+        {
+            Naam = naam;
+        }
         public string Naam { get; set; }
-        [NotMapped]
-        public virtual List<Group> Groups { get; set; }
+    
     }
 }

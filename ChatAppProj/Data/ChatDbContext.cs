@@ -18,6 +18,12 @@ namespace ChatApp.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Group>()
+                .HasOne(p => p.Creator);
+            modelBuilder.Entity<Group>()
+                .HasOne(le => le.Leden);
+            
+
             base.OnModelCreating(modelBuilder);
         }
     }

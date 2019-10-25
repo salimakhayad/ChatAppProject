@@ -8,22 +8,27 @@ namespace ChatApp.Domain
     // for 1 on 1 chats
     public class PrivateChat:Group
     {
-        #region properties
-        public int PartnerName { get; set; }
-        #endregion
+        /*
+         * public virtual Profiel Creator { get; set; }
+        public virtual ICollection<Profiel> Leden { get; set; }
+        public Chat GroupChat { get; set; }
+        public string GroupName { get; set; }
+         */
         public PrivateChat()
         {
 
         }
-        public PrivateChat(int creatorUserId, string creatorName, string name, Profiel partner,int partnerName) :base(creatorUserId,creatorName,name)
+        public PrivateChat(Profiel creator, string groupName, Profiel partner) : base(creator, groupName)
         {
-            UserId = creatorUserId;
-            ProfielName = creatorName;
-            Name = name;
-            Profielen = new List<Profiel>() {};
-            Chat = new Chat() { Messages = new List<Message>() };
-            PartnerName = partnerName;
+            Creator = creator;
+            GroupChat = new Chat();
+            Leden = new List<Profiel>() { partner };
+            Partner = partner;
         }
+        #region properties
+        public virtual Profiel Partner { get; set; }
+        #endregion
+       
 
     }
 }
