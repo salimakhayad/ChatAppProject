@@ -14,7 +14,9 @@ namespace ChatApp.Domain
         {
 
         }
+        public int ZenderId { get; set; }
         public virtual Profiel Zender { get; set; }
+        public int OntvangerId { get; set; }
         public virtual Profiel Ontvanger { get; set; }
         public string Bericht;
         public DateTime Datum { get; }

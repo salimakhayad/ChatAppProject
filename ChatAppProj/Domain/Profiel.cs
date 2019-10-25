@@ -13,13 +13,15 @@ namespace ChatApp.Domain
     {
         public Profiel()
         {
-            
+            Messages = new HashSet<Message>();
         }
         public Profiel(string naam)
         {
             Naam = naam;
+            Messages = new HashSet<Message>();
         }
         public string Naam { get; set; }
+        public virtual ICollection<Message> Messages { get; set; }
     
     }
 }

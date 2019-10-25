@@ -8,6 +8,6 @@ namespace ChatAppProj.Domain
 {
     public abstract class UniqueId
     {
-      public int Id { get; set; }
+      public string Id { get; set; }
     }
 }
