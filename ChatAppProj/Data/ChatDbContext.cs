@@ -15,15 +15,11 @@ namespace ChatApp.Data
         public DbSet<Group> Groups { get; set; }
         public DbSet<PrivateChat> PrivateGroups { get; set; }
         public DbSet<Chat> Chats { get; set; }
+        public DbSet<Message> Messages { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            
-            modelBuilder.Entity<Group>()
-                .HasOne(p => p.Creator);
-            modelBuilder.Entity<Group>()
-                .HasOne(le => le.Leden);
-            
 
             base.OnModelCreating(modelBuilder);
         }

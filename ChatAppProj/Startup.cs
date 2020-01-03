@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ChatApp.Data;
+using ChatApp.Domain;
+using ChatAppProj.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -33,11 +36,27 @@ namespace ChatAppProj
             services.AddControllersWithViews();
             services.AddRazorPages();
 
-            services.AddDbContext<ChatDbContext>(options =>
-               options.UseLazyLoadingProxies().UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContextPool<ChatDbContext>(options =>
+               options.UseLazyLoadingProxies().UseSqlServer(Configuration.GetConnectionString("ChatDb")));
 
-            services.AddDefaultIdentity<IdentityUser>()
-               .AddEntityFrameworkStores<ChatDbContext>();
+            services.AddIdentity<Profiel, IdentityRole>(options => { })
+                 .AddEntityFrameworkStores<ChatDbContext>()
+                 .AddDefaultTokenProviders();
+
+            services.AddScoped<IUserClaimsPrincipalFactory<Profiel>, ProfielUserClaimsPrincipalFactory>();
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
+                options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
+                options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+            }).AddCookie("Cookies");
+            services.ConfigureApplicationCookie(options => options.LoginPath = "/Home/Login");
+            
+            services.AddTransient<SignInManager<Profiel>>();
+            services.AddTransient<UserManager<Profiel>>();
+
+            services.AddTransient<IChatService, ChatService>();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 

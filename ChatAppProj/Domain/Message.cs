@@ -1,5 +1,4 @@
-﻿using ChatAppProj.Domain;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,27 +7,15 @@ using System.Threading.Tasks;
 
 namespace ChatApp.Domain
 {
-    public class Message:UniqueId
+    public class Message
     {
-        public Message()
-        {
-
-        }
-        public int ZenderId { get; set; }
-        public virtual Profiel Zender { get; set; }
-        public int OntvangerId { get; set; }
-        public virtual Profiel Ontvanger { get; set; }
+        public int Id { get; set; }
+        public string ZenderId { get; set; }
+        public string ChatId { get; set; }
         public string Bericht;
-        public DateTime Datum { get; }
+        public DateTime TijdStip { get; }
+        public virtual Chat Chat { get; set; }
 
-        public ICollection<Profiel> Ontvangers { get; set; }
-        public Message(Profiel zender, Profiel ontvanger,string bericht)
-        {
-            Zender = zender;
-            Ontvanger = ontvanger;
-            Bericht = bericht;
-            Datum = DateTime.Now;
-            Ontvangers = new List<Profiel>() { Ontvanger };
-        }
+
     }
 }
