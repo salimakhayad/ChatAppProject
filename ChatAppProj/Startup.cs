@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using ChatApp.Data;
 using ChatApp.Domain;
-using ChatAppProj.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -16,7 +15,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace ChatAppProj
+namespace ChatApp
 {
     public class Startup
     {
@@ -31,7 +30,12 @@ namespace ChatAppProj
         
         public void ConfigureServices(IServiceCollection services)
         {
-
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
+                options.CheckConsentNeeded = context => true;
+                options.MinimumSameSitePolicy = SameSiteMode.None;
+            });
 
             services.AddControllersWithViews();
             services.AddRazorPages();
@@ -57,7 +61,7 @@ namespace ChatAppProj
 
             services.AddTransient<IChatService, ChatService>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-
+            services.AddMvc((opt) => opt.EnableEndpointRouting = false);
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
         }
@@ -80,15 +84,15 @@ namespace ChatAppProj
             app.UseStaticFiles();
 
             app.UseRouting();
-
+            app.UseCookiePolicy();
+            app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
+            app.UseMvc(routes =>
             {
-                endpoints.MapControllerRoute(
+                routes.MapRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
-                endpoints.MapRazorPages();
+                    template: "{controller=Home}/{action=Index}/{id?}");
             });
         }
     }

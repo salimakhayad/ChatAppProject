@@ -22,6 +22,7 @@ namespace ChatApp.Domain
         public string Naam { get; set; }
         public virtual ICollection<Message> Messages { get; set; }
         public string FavorieteKleur { get; set; }
+        public byte[] ProfielFoto { get; set; }
 
     }
 }

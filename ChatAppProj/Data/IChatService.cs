@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ChatAppProj.Data
+namespace ChatApp.Data
 {
     public interface IChatService
     {

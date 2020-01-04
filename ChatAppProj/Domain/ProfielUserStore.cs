@@ -146,7 +146,7 @@ namespace ChatApp.Domain
         public static DbConnection GetOpenConnection()
         {
             var connection = new SqlConnection("Server=(localdb)\\MSSQLLocalDB;" +
-                                                "Database=ChatDb;" +
+                                                "Database=Chat;" +
                                                 "Trusted_Connection=True;" +
                                                 "MultipleActiveResultSets=true");
             connection.Open();
