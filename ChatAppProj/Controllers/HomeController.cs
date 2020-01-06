@@ -13,6 +13,7 @@ using ChatApp.Models.Profiel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using System.IO;
+using ChatApp.Models.Home;
 
 namespace ChatApp.Controllers
 {
@@ -34,8 +35,20 @@ namespace ChatApp.Controllers
         [Route("")]
         public IActionResult Index()
         {
-            return View();
+            HomeModel model = new HomeModel()
+            {
+                Profielen = new List<Profiel>()
+            };
+
+            var profilesFromDb = _chatService.GetAllProfielen().ToList();
+            if (profilesFromDb != null)
+            {
+                model.Profielen = profilesFromDb;
+            }
+    
+            return View(model);  
         }
+        
 
         public IActionResult Privacy()
         {
@@ -76,6 +89,7 @@ namespace ChatApp.Controllers
                         using var memoryStream = new MemoryStream();
                         model.ProfielFoto.CopyTo(memoryStream);
                         userFromDb.ProfielFoto = memoryStream.ToArray();
+
                         _chatService.SaveChanges();
                         return View("Success");
                     }
