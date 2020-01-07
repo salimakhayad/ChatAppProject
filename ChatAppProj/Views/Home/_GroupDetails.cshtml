@@ -1,0 +1,8 @@
+﻿@model ChatApp.Domain.Group
+    <li class="col-4">
+            <img class="profiel_hp" width="200" height="150" src="@String.Format("data:image/gif;base64,{0}", Convert.ToBase64String(Model.P))" alt="ProfielFoto" />
+            <h2>@Model.UserName</h2>
+            <p>@Model.Naam</p>
+            <p><a class="btn btn-secondary" href="#" role="button">Toon Details »</a></p>
+        }
+    </li>

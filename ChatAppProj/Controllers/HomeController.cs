@@ -33,6 +33,7 @@ namespace ChatApp.Controllers
             this._signInManager = signInManager;
         }
         [Route("")]
+        [Authorize]
         public IActionResult Index()
         {
             HomeModel model = new HomeModel()
