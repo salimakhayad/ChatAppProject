@@ -38,7 +38,8 @@ namespace ChatApp.Controllers
         {
             HomeModel model = new HomeModel()
             {
-                Profielen = new List<Profiel>()
+                Profielen = new List<Profiel>(),
+                ChatGroups = new List<Group>()
             };
 
             var profilesFromDb = _chatService.GetAllProfielen().ToList();
@@ -46,7 +47,12 @@ namespace ChatApp.Controllers
             {
                 model.Profielen = profilesFromDb;
             }
-    
+            var groupsFromDb = _chatService.GetAllGroups().ToList();
+            if (groupsFromDb != null)
+            {
+                model.ChatGroups = groupsFromDb;
+            }
+
             return View(model);  
         }
         

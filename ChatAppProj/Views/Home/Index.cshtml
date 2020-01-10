@@ -3,8 +3,8 @@
     ViewData["Title"] = "Home Page";
 
 }
-    <div class="container">
-        <h2>Profielen <i class="fas fa-angle-double-right"></i> Index</h2>
+    <div >
+        <h2>Alle profielen <i class="fas fa-angle-double-right"></i> Index</h2>
         @{
             <div>
                 <ul class="hs">
@@ -15,15 +15,15 @@
                 </ul>
             </div>
         }
-        <h2>ChatGroups <i class="fas fa-angle-double-right"></i> Index</h2>
-        @{
-            <div>
-                <ul class="hs">
-                    @foreach (var chatGroup in Model.ChatGroups)
-                    {
-                        <partial name="_ProfielDetails" model="chatGroup" />
-                    }
-                </ul>
-            </div>
-        }
+        <!-- <h2>ChatGroups <i class="fas fa-angle-double-right"></i> Index</h2>
+     @{
+         <div>
+             <ul class="hs">
+                 foreach (var chatGroup in Model.ChatGroups)
+                 {
+                     _GroupDetails
+                 }
+             </ul>
+         </div>
+     }-->
     </div>
