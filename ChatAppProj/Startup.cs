@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ChatApp.Data;
 using ChatApp.Domain;
+using ChatApp.Hubs;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -21,18 +22,15 @@ namespace ChatApp
     {
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            _configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
-
-        // This method gets called by the runtime. Use this method to add services to the container.
+        private IConfiguration _configuration { get; }
         
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<CookiePolicyOptions>(options =>
             {
-                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
@@ -41,13 +39,13 @@ namespace ChatApp
             services.AddRazorPages();
 
             services.AddDbContextPool<ChatDbContext>(options =>
-               options.UseLazyLoadingProxies().UseSqlServer(Configuration.GetConnectionString("ChatDb")));
+               options.UseSqlServer(_configuration.GetConnectionString("ChatDb")));
 
-            services.AddIdentity<Profiel, IdentityRole>(options => { })
+            services.AddIdentity<Profile, IdentityRole>(options => { })
                  .AddEntityFrameworkStores<ChatDbContext>()
                  .AddDefaultTokenProviders();
 
-            services.AddScoped<IUserClaimsPrincipalFactory<Profiel>, ProfielUserClaimsPrincipalFactory>();
+            services.AddScoped<IUserClaimsPrincipalFactory<Profile>, ProfileUserClaimsPrincipalFactory>();
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
@@ -56,44 +54,45 @@ namespace ChatApp
             }).AddCookie("Cookies");
             services.ConfigureApplicationCookie(options => options.LoginPath = "/Home/Login");
             
-            services.AddTransient<SignInManager<Profiel>>();
-            services.AddTransient<UserManager<Profiel>>();
+            services.AddTransient<SignInManager<Profile>>();
+            services.AddTransient<UserManager<Profile>>();
 
             services.AddTransient<IChatService, ChatService>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddMvc((opt) => opt.EnableEndpointRouting = false);
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
+            services.AddSignalR();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app)//, IWebHostEnvironment env
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
-
             app.UseHttpsRedirection();
+           // if (env.IsDevelopment())
+           // {
+           //  app.UseDeveloperExceptionPage();
+           // }
             app.UseStaticFiles();
-
-            app.UseRouting();
-            app.UseCookiePolicy();
             app.UseAuthentication();
+           
+            app.UseRouting();
             app.UseAuthorization();
-
-            app.UseMvc(routes =>
+            app.UseStaticFiles();
+            app.UseCookiePolicy();
+            //app.UseMvc(routes =>
+            //{
+            //    routes.MapRoute(
+            //        name: "default",
+            //        template: "{controller=Home}/{action=Index}/{id?}");
+            //});
+                app.UseMvcWithDefaultRoute();
+            app.UseEndpoints(endpoints =>
             {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapHub<ChatHub>("/chatHub");
             });
+
+            
+
         }
     }
 }

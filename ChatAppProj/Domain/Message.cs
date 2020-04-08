@@ -9,12 +9,17 @@ namespace ChatApp.Domain
 {
     public class Message
     {
+        public Message()
+        {
+            Timestamp = DateTime.Now;
+        }
         public int Id { get; set; }
-        public string ZenderId { get; set; }
-        public string ChatId { get; set; }
-        public string Bericht;
-        public DateTime TijdStip { get; }
-        public virtual Chat Chat { get; set; }
+        public string ProfileName { get; set; }
+        public string Text { get; set; }
+        public DateTime Timestamp { get; }
+        [ForeignKey("Channel")]
+        public int ChannelId { get; set; }
+        public Channel Channel { get; set; }
 
 
     }

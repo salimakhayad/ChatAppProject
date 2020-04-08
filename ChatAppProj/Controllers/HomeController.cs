@@ -9,7 +9,7 @@ using ChatApp.Models;
 using ChatApp.Data;
 using ChatApp.Domain;
 using Microsoft.AspNetCore.Identity;
-using ChatApp.Models.Profiel;
+using ChatApp.Models.Profile;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using System.IO;
@@ -17,15 +17,16 @@ using ChatApp.Models.Home;
 
 namespace ChatApp.Controllers
 {
+   
     public class HomeController : Controller
     {
         private readonly IChatService _chatService;
-        private readonly IUserClaimsPrincipalFactory<Profiel> _claimsPrincipalFactory;
-        private readonly SignInManager<Profiel> _signInManager;
-        private readonly UserManager<Profiel> _userManager;
-        private Profiel _currentProfiel;
+        private readonly IUserClaimsPrincipalFactory<Profile> _claimsPrincipalFactory;
+        private readonly SignInManager<Profile> _signInManager;
+        private readonly UserManager<Profile> _userManager;
+        private Profile _currentProfile;
 
-        public HomeController(IChatService chatService, UserManager<Profiel> userManager, IUserClaimsPrincipalFactory<Profiel> claimsPrincipalFactory, SignInManager<Profiel> signInManager)
+        public HomeController(IChatService chatService, UserManager<Profile> userManager, IUserClaimsPrincipalFactory<Profile> claimsPrincipalFactory, SignInManager<Profile> signInManager)
         {
             this._userManager = userManager;
             this._claimsPrincipalFactory = claimsPrincipalFactory;
@@ -38,14 +39,14 @@ namespace ChatApp.Controllers
         {
             HomeModel model = new HomeModel()
             {
-                Profielen = new List<Profiel>(),
+                Profiles = new List<Profile>(),
                 ChatGroups = new List<Group>()
             };
 
-            var profilesFromDb = _chatService.GetAllProfielen().ToList();
+            var profilesFromDb = _chatService.GetAllProfiles().ToList();
             if (profilesFromDb != null)
             {
-                model.Profielen = profilesFromDb;
+                model.Profiles = profilesFromDb;
             }
             var groupsFromDb = _chatService.GetAllGroups().ToList();
             if (groupsFromDb != null)
@@ -82,20 +83,20 @@ namespace ChatApp.Controllers
 
                 if (user == null)
                 {
-                    user = new Profiel
+                    user = new Profile
                     {
                         Id = Guid.NewGuid().ToString(),
                         UserName = model.UserName,
-                        FavorieteKleur = "Dark Orange"
+                        FavouriteColor = "Dark Orange"
                     };
                     var identityResult = await _userManager.CreateAsync(user, model.Password);
                     if (identityResult.Succeeded)
                     {
-                        var userFromDb = _chatService.GetAllProfielen().FirstOrDefault(x => x.Id == user.Id);
+                        var userFromDb = _chatService.GetAllProfiles().FirstOrDefault(x => x.Id == user.Id);
                         
                         using var memoryStream = new MemoryStream();
-                        model.ProfielFoto.CopyTo(memoryStream);
-                        userFromDb.ProfielFoto = memoryStream.ToArray();
+                        model.ProfilePicture.CopyTo(memoryStream);
+                        userFromDb.ProfilePicture = memoryStream.ToArray();
 
                         _chatService.SaveChanges();
                         return View("Success");
@@ -124,8 +125,8 @@ namespace ChatApp.Controllers
                     var principal = await _claimsPrincipalFactory.CreateAsync(user);
 
                     await HttpContext.SignInAsync("Identity.Application", principal);
-                    _currentProfiel = _chatService.GetAllProfielen().FirstOrDefault(usr => usr.Id == user.Id);
-                    return RedirectToAction("Index");
+                    _currentProfile = _chatService.GetAllProfiles().FirstOrDefault(usr => usr.Id == user.Id);
+                    return RedirectToAction("Index","Home");
                 }
                 ModelState.AddModelError("", "Invalid Username or Password");
             }

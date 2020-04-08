@@ -1,4 +1,4 @@
-﻿@using ChatApp.Models.Profiel;
+﻿@using ChatApp.Models.Profile;
 @model RegisterModel
     <div class="container">
         <div class="row">
@@ -12,9 +12,9 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label asp-for="ProfielFoto" class="col-sm-2"></label>
-                        <input class="form-control" asp-for="ProfielFoto" type="file" />
-                        <span accept=".jpg,.jpeg,.png" class="text-danger" asp-validation-for="ProfielFoto"></span>
+                        <label asp-for="ProfilePicture" class="col-sm-2"></label>
+                        <input class="form-control" asp-for="ProfilePicture" type="file" />
+                        <span accept=".jpg,.jpeg,.png" class="text-danger" asp-validation-for="ProfilePicture"></span>
                     </div>
                     <div class="form-group">
                         <label asp-for="Password" classs="col-sm-2"></label>

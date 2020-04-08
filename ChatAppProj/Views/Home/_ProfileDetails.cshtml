@@ -1,0 +1,14 @@
+﻿@model ChatApp.Domain.Profile
+    <div class="Profile">
+        @if (Model.UserName != User.Claims.ToArray()[1].Value.ToString())
+        {
+            @if (Model.ProfilePicture != null)
+            {
+                <img class="profilePicture" width="200" height="150" src="@String.Format("data:image/gif;base64,{0}", Convert.ToBase64String(Model.ProfilePicture))" alt="ProfilePicture" />
+            }
+            <h2>@Model.UserName</h2>
+            <p>@Model.Name</p>
+            <p><a class="btn btn-secondary" href="#" role="button">Add to Friendlist »</a></p>
+        }
+    </div>
+ 

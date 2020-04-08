@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ChatApp.Models
+namespace ChatApp.Models.Group
 {
-    public class IndexChatModel
+    public class GroupIndexModel
     {
-        public List<Chat> Chats { get; set; }
+        public List<Domain.Group> Groups { get; set; }
     }
 }

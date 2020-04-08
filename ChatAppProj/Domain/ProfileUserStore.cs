@@ -10,21 +10,21 @@ using System.Data;
 namespace ChatApp.Domain
 {
     
-    public class ProfielUserStore : IUserStore<Profiel>,IUserPasswordStore<Profiel>
+    public class ProfileUserStore : IUserStore<Profile>,IUserPasswordStore<Profile>
     {
         public void Dispose()
         {
         }
-        public Task<string> GetUserIdAsync(Profiel user, CancellationToken cancellationToken)
+        public Task<string> GetUserIdAsync(Profile user, CancellationToken cancellationToken)
         {
             return Task.FromResult(user.Id);
         }
 
-        public async Task<Profiel> FindByIdAsync(string userId, CancellationToken cancellationToken)
+        public async Task<Profile> FindByIdAsync(string userId, CancellationToken cancellationToken)
         {
             using (var connection = GetOpenConnection())
             {
-                return await connection.QueryFirstOrDefaultAsync<Profiel>(
+                return await connection.QueryFirstOrDefaultAsync<Profile>(
                      "select * From AspNetUsers" +
                      "where [Id] = @id",
                      new
@@ -36,11 +36,11 @@ namespace ChatApp.Domain
             
         }
 
-        public async Task<Profiel> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
+        public async Task<Profile> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
         {
             using (var connection = GetOpenConnection())
             {
-                return await connection.QueryFirstOrDefaultAsync<Profiel>(
+                return await connection.QueryFirstOrDefaultAsync<Profile>(
                      "SELECT * FROM AspNetUsers WHERE NormalizedUserName = @name",
                      new
                      {
@@ -50,48 +50,48 @@ namespace ChatApp.Domain
             }
         }
 
-        public Task<string> GetNormalizedUserNameAsync(Profiel user, CancellationToken cancellationToken)
+        public Task<string> GetNormalizedUserNameAsync(Profile user, CancellationToken cancellationToken)
         {
             return Task.FromResult(user.NormalizedUserName);
         }
 
-        public Task<string> GetPasswordHashAsync(Profiel user, CancellationToken cancellationToken)
+        public Task<string> GetPasswordHashAsync(Profile user, CancellationToken cancellationToken)
         {
             return Task.FromResult(user.PasswordHash);
         }
 
         
 
-        public Task<string> GetUserNameAsync(Profiel user, CancellationToken cancellationToken)
+        public Task<string> GetUserNameAsync(Profile user, CancellationToken cancellationToken)
         {
             return Task.FromResult(user.UserName);
         }
 
-        public Task<bool> HasPasswordAsync(Profiel user, CancellationToken cancellationToken)
+        public Task<bool> HasPasswordAsync(Profile user, CancellationToken cancellationToken)
         {
             return Task.FromResult(user.PasswordHash != null);
         }
 
-        public Task SetNormalizedUserNameAsync(Profiel user, string normalizedName, CancellationToken cancellationToken)
+        public Task SetNormalizedUserNameAsync(Profile user, string normalizedName, CancellationToken cancellationToken)
         {
             user.NormalizedUserName = normalizedName;
             return Task.CompletedTask;
         }
 
-        public Task SetPasswordHashAsync(Profiel user, string passwordHash, CancellationToken cancellationToken)
+        public Task SetPasswordHashAsync(Profile user, string passwordHash, CancellationToken cancellationToken)
         {
             user.PasswordHash = passwordHash;
             return Task.CompletedTask;
         }
 
         
-        public Task SetUserNameAsync(Profiel user, string userName, CancellationToken cancellationToken)
+        public Task SetUserNameAsync(Profile user, string userName, CancellationToken cancellationToken)
         {
             user.UserName = userName;
             return Task.CompletedTask;
         }
 
-        public async Task<IdentityResult> UpdateAsync(Profiel user, CancellationToken cancellationToken)
+        public async Task<IdentityResult> UpdateAsync(Profile user, CancellationToken cancellationToken)
         {
             using (var connection = GetOpenConnection())
             {
@@ -113,7 +113,7 @@ namespace ChatApp.Domain
             }
             return IdentityResult.Success;
         }
-        public async Task<IdentityResult> CreateAsync(Profiel user, CancellationToken cancellationToken)
+        public async Task<IdentityResult> CreateAsync(Profile user, CancellationToken cancellationToken)
         {
             // orm dapper
             string commandText = "insert into AspNetUsers([Id],[UserName],[NormalizedUserName],[PasswordHash]," +
@@ -154,7 +154,7 @@ namespace ChatApp.Domain
             // consider using IDisposable
 
         }
-        public Task<IdentityResult> DeleteAsync(Profiel user, CancellationToken cancellationToken)
+        public Task<IdentityResult> DeleteAsync(Profile user, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }

@@ -1,0 +1,56 @@
+﻿@using ChatApp.Domain;
+
+@model Group
+  
+    <div class="flexbox-container">
+        <div class="flexbox-item flexbox-item-1">
+
+            <div id="groupTitle">
+                <small>-----></small> @Model.Name  <small><-----</small>
+            </div>
+
+            @foreach (var channel in Model.Channels)
+            {  
+                <div class="channelText">
+                    <form asp-action="JoinChannel" asp-controller="Chat" asp-route-channelId="@channel.Id">
+                        <button type="submit"><span>@channel.Name</span></button>
+                    </form>
+
+                </div>
+            }
+
+            <div class="channelText">
+                <form asp-action="CreateChannel" asp-controller="Chat">
+                    <button type="submit"><span>Add Channel +</span></button>
+                </form>
+
+            </div>
+
+
+
+        </div>
+        <div class="flexbox-item flexbox-item-2">
+            <div class="chat-body">
+                 
+            </div>
+
+
+
+            <form id="inputsendmessage" style="display:none;" class="chat-input" onsubmit="sendMessage(event)" asp-controller="Chat" asp-action="CreateMessage">
+                <input type="hidden" name="channelID" value="@Model.Name" />
+                <input type="text" name="message" id="message-input">
+                <button type="submit"> Send</button>
+            </form>
+
+        </div>
+        <div class="flexbox-item flexbox-item-3">
+            <div id="groupTitle">
+                <small>-----></small> Friends  <small><-----</small>
+            </div>
+        </div>
+
+
+
+    </div>
+
+

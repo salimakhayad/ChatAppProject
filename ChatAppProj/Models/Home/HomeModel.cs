@@ -8,7 +8,7 @@ namespace ChatApp.Models.Home
 {
     public class HomeModel
     {
-        public ICollection<Domain.Profiel> Profielen { get; set; }
+        public ICollection<Domain.Profile> Profiles { get; set; }
         public ICollection<Domain.Group> ChatGroups { get; set; }
     }
 }

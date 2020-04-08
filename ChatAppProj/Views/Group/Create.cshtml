@@ -1,0 +1,15 @@
+﻿@using  ChatApp.Models.Group;
+
+@model CreateGroupModel
+    <ul>
+        <form enctype="multipart/form-data" asp-controller="Group" asp-action="Create" method="post" class="form-horizontal">
+            <div class="form-group">
+                <label asp-for="Name" class="col-sm-2"></label>
+                <div class="col-sm-10">
+                    <input asp-for="Name" class="form-control" />
+                </div>
+            </div>
+            <button type="submit" class="btn-primary"> Submit </button>
+            <div asp-validation-summary="All"></div>
+        </form>
+    </ul>

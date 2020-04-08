@@ -42,12 +42,12 @@ namespace ChatApp.Data
             }
         }
 
-        public void DeleteProfielById(int Id)
+        public void DeleteProfileById(int Id)
         {
-            var profiel = _context.Profielen.Where(msg => msg.Id == Id.ToString()).FirstOrDefault();
-            if (profiel != null)
+            var Profile = _context.Profiles.Where(msg => msg.Id == Id.ToString()).FirstOrDefault();
+            if (Profile != null)
             {
-                _context.Profielen.Remove(profiel);
+                _context.Profiles.Remove(Profile);
             }
         }
 
@@ -66,15 +66,17 @@ namespace ChatApp.Data
             return _context.Messages;
         }
 
-        public IEnumerable<PrivateChat> GetAllPrivateChats()
+       
+
+        public IEnumerable<Profile> GetAllProfiles()
         {
-            return _context.Chats.OfType<PrivateChat>();
+            return _context.Profiles;
+
         }
 
-        public IEnumerable<Profiel> GetAllProfielen()
+        public IEnumerable<Channel> GetAllChannels()
         {
-            return _context.Profielen;
-
+            return _context.Channels;
         }
 
         public void InsertChat(Chat chat)
@@ -92,12 +94,39 @@ namespace ChatApp.Data
             _context.Messages.Add(message);
         }
 
-        public void InsertProfiel(Profiel profiel)
+        public void InsertProfile(Profile Profile)
         {
-            _context.Profielen.Add(profiel);
+            _context.Profiles.Add(Profile);
         }
+        public void InsertChannel(Channel channel)
+        {
+            _context.Channels.Add(channel);
+        }
+        public async Task SaveChangesAsync()
+        {
+           await _context.SaveChangesAsync();
+        }
+
         public void SaveChanges()
         {
+            _context.SaveChanges();
+        }
+
+        public IEnumerable<ChatProfile> GetAllChatProfiles()
+        {
+            return _context.ChatProfiles;
+        }
+
+        public void DeleteChatProfile(int Id)
+        {
+            var  chatprofile = _context.ChatProfiles.Where(x=>x.ChatId==Id).FirstOrDefault();
+            _context.ChatProfiles.Remove(chatprofile);
+            _context.SaveChanges();
+        }
+
+        public void InsertChatProfile(ChatProfile chatProfile)
+        {
+            _context.ChatProfiles.Add(chatProfile);
             _context.SaveChanges();
         }
     }

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -9,7 +10,16 @@ namespace ChatApp.Domain
 {
     public class Chat
     {
+
+        public Chat()
+        {
+        }
         public int Id { get; set; }
-        public virtual ICollection<Message> Messages { get; set; }
+        [ForeignKey("Channel")]
+        public int ChannelId { get; set; }
+        public Channel Channel { get; set; }
+        public ChatType ChatType { get; set; }
+        public ICollection<Message> Messages { get; set; }
+        public ICollection<ChatProfile> ChatProfiles { get; set; }
     }
 }

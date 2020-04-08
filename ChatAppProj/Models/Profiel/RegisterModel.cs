@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ChatApp.Models.Profiel
+namespace ChatApp.Models.Profile
 {
     public class RegisterModel
     {
@@ -17,9 +17,9 @@ namespace ChatApp.Models.Profiel
         [Compare("Password")]
         [DataType(DataType.Password)]
         public string ConfirmPassword { get; set; }
-        [DisplayName("ProfielFoto")]
+        [DisplayName("ProfilePicture")]
         [Required]
-        public IFormFile ProfielFoto { get; set; }
+        public IFormFile ProfilePicture { get; set; }
 
     }
 
