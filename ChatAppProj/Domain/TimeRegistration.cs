@@ -13,11 +13,11 @@ namespace ChatApp.Domain
 
         [ForeignKey("Chat")]
         public int ChatId { get; set; }
-        public Chat Chat { get; set; }
+        public virtual Chat Chat { get; set; }
 
         [ForeignKey("Profile")]
         public string ProfileId { get; set; }
-        public Profile Profile { get; set; }
+        public virtual Profile Profile { get; set; }
         public DateTime TimeEntered { get; set; }
         public DateTime? TimeLeft { get; set; }
 

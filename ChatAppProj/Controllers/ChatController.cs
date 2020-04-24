@@ -87,7 +87,7 @@ namespace ChatApp.Controllers
             await _chat.Clients.Group(chat.Id.ToString())
             .SendAsync("UserJoinedChannel", new
             {
-                Text = " ... has joined the chat",
+                Text = " is now online.",
                 Name = profile.UserName,
                 Timestamp = DateTime.Now.ToShortTimeString()
             });
