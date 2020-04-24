@@ -28,7 +28,7 @@ namespace ChatApp.Controllers
         private readonly IUserClaimsPrincipalFactory<Profile> _claimsPrincipalFactory;
         private readonly SignInManager<Profile> _signInManager;
         private readonly UserManager<Profile> _userManager;
-        private Profile _currentProfile;
+        //private Profile _currentProfile;
 
         public ChatController(IHubContext<ChatHub> chat, IChatService service, IUserStore<Profile> userStore, UserManager<Profile> userManager, IUserClaimsPrincipalFactory<Profile> claimsPrincipalFactory, SignInManager<Profile> signInManager)
         {
@@ -54,68 +54,70 @@ namespace ChatApp.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateMessage(int chatId, string message)
         {
-
             var Message = new Message()
             {
-                ChannelId = chatId,
+                ChatId = chatId,
                 Text = message,
-                ProfileName = User.Identity.Name
+                ProfileName = User.Identity.Name,
+                Timestamp = DateTime.Now              
             };
             _chatService.InsertMessage(Message);
             await _chatService.SaveChangesAsync();
+            var chat = _chatService.GetAllChats().FirstOrDefault(c => c.Id == chatId);
+            var channel = _chatService.GetAllChannels().FirstOrDefault(channel => channel.Chat.Id == chatId);
 
-            return RedirectToAction("Chat", new { id = chatId });
+            return RedirectToAction("JoinChannel","Channel", new { channelId = channel.Id });
         }
         //http://localhost:5001/Chat/JoinChannel?channelId=1
-        [HttpPost("{channelId}")]
-        public IActionResult JoinChannel(string channelId)
-        {
-            ChannelSelectedViewModel model = new ChannelSelectedViewModel();
-
-            var profileId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            var profile = _chatService.GetAllProfiles().Where(x => x.Id == profileId).FirstOrDefault();
-
-            var selectedChannel = _chatService.GetAllChannels()
-                  .FirstOrDefault(c => c.Id.ToString() == channelId);
-
-            var currentGroup = _chatService.GetAllGroups().FirstOrDefault(g => g.Channels.Contains(selectedChannel));
-            var channels = _chatService.GetAllChannels()
-                  .Where(c => c.GroupId == currentGroup.Id);
-
-            
-
-            foreach (var channel in channels)
-            {
-                var sChannel = _chatService.GetAllChannels()
-                 .Where(c => c.Id == channel.Id)
-                 .FirstOrDefault();
-
-                var sChat = _chatService.GetAllChats()
-                .Where(chat => chat.ChannelId == sChannel.Id)
-                .FirstOrDefault();
-
-                var messages = _chatService.GetAllMessages()
-               .Where(mes => mes.ChannelId == sChat.ChannelId);
+       
 
 
-                sChat.Messages = messages.ToList();
-                selectedChannel.Chat = sChat;
-            }
-            var allmessages = _chatService.GetAllMessages();
-            model.Channels = channels.ToList();
-            model.Name = currentGroup.Name;
-            model.Profile = profile;
-            model.ProfileId = profile.Id;
-            model.SelectedChannel = selectedChannel;
-            model.Id = currentGroup.Id;
-
-            return View(model);
-           
-        }
         [HttpPost("[action]/{connectionId}/{channelId}")]
         public async Task<IActionResult> JoinChannel(string connectionId, string channelId)
         {
             await _chat.Groups.AddToGroupAsync(connectionId, channelId);
+
+
+            var chat = _chatService.GetAllChats().FirstOrDefault(c => c.ChannelId.ToString() == channelId);
+
+            var profileId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var profile = _chatService.GetAllProfiles().Where(x => x.Id == profileId).FirstOrDefault();
+
+
+            await _chat.Clients.Group(chat.Id.ToString())
+            .SendAsync("UserJoinedChannel", new
+            {
+                Text = " ... has joined the chat",
+                Name = profile.UserName,
+                Timestamp = DateTime.Now.ToShortTimeString()
+            });
+
+
+            // db
+            var timeregistration = new TimeRegistration()
+            {
+                Chat = chat,
+                ChatId = chat.Id,
+                Profile = profile,
+                ProfileId = profile.Id,
+                TimeEntered = DateTime.Now
+            };
+            _chatService.InsertTimeRegistration(timeregistration);
+            _chatService.SaveChanges();
+
+            var trs = _chatService.GetAllTimeRegistrations().Where(tr => tr.ChatId == chat.Id&&tr.TimeLeft==null);
+            var usersCurrentlyOnline = new List<string>();
+            foreach (var tr in trs)
+            {
+                var user = _chatService.GetAllProfiles().FirstOrDefault(p => p.Id == tr.ProfileId);
+                usersCurrentlyOnline.Add(user.UserName);
+            }
+
+             await _chat.Clients.Group(chat.Id.ToString()).
+             SendAsync("UpdateUsersOnline", usersCurrentlyOnline)
+             ;
+
+
             return Ok();
         }
         [HttpPost("[action]/{connectionId}/{channelId}")]
@@ -124,30 +126,31 @@ namespace ChatApp.Controllers
             await _chat.Groups.RemoveFromGroupAsync(connectionId, channelId);
             return Ok();
         }
+        // axios.post('/Chat/SendMessage', data)
         [HttpPost("[action]")]
         public async Task<ActionResult> SendMessage(
-            int channelID,
-            string message,
-            string roomName,
-            [FromServices]ChatDbContext ctx)
+            int chatId,
+            string message
+            )
         {
-            
+            var chat = _chatService.GetAllChats().FirstOrDefault(c=>c.Id==chatId);
             var Message = new Message()
             {
-                ChannelId = channelID,
+                Chat = chat,
+                ChatId = chatId,
                 Text = message,
                 ProfileName = User.Identity.Name,
-
+                Timestamp = DateTime.Now
             };
-            ctx.Messages.Add(Message);
-            await ctx.SaveChangesAsync();
+            _chatService.InsertMessage(Message);
+            await _chatService.SaveChangesAsync();
 
-            await _chat.Clients.Group(channelID.ToString())
+            await _chat.Clients.Group(chatId.ToString())
             .SendAsync("ReceiveMessage", new
             {
                 Text = Message.Text,
                 Name = Message.ProfileName,
-                Timestamp = Message.Timestamp.ToString("dd/MM/yyyy hh:mm:ss")
+                Timestamp = Message.Timestamp.ToShortTimeString()
             });
             return Ok();
         }

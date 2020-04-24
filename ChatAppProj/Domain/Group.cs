@@ -12,19 +12,20 @@ namespace ChatApp.Domain
         public Group()
         {
             Channels = new List<Channel>();
-            ChatProfiles = new List<ChatProfile>();
+            ChannelProfiles = new List<ChannelProfile>();
         }
-        #region properties
+    
         public int Id { get; set; }
         public string Name { get; set; }
         [ForeignKey("Profile")]
         public string ProfileId { get; set; }
         public Profile Profile { get; set; }
-        // public byte[] Photo { get; set; }
+        public string Content { get; set; }
+        public byte[] Photo { get; set; }
         public virtual ICollection<Channel> Channels { get; set; }
-        public virtual ICollection<ChatProfile> ChatProfiles { get; set; }
+        public virtual ICollection<ChannelProfile> ChannelProfiles { get; set; }
 
-        #endregion
+
 
 
 

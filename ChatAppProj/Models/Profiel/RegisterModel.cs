@@ -11,6 +11,9 @@ namespace ChatApp.Models.Profile
     public class RegisterModel
     {
         public string UserName { get; set; }
+        [Required]
+         [DataType(DataType.EmailAddress)]
+        public string EmailAddress { get; set; }
 
         [DataType(DataType.Password)]
         public string Password { get; set; }

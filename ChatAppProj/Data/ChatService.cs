@@ -15,6 +15,14 @@ namespace ChatApp.Data
             _context = context;
         }
 
+        public void DeleteTimeRegistration(int Id)
+        {
+            var tr = _context.TimeRegistrations.Where(tr => tr.Id == Id).FirstOrDefault();
+            if (tr != null)
+            {
+                _context.TimeRegistrations.Remove(tr);
+            }
+        }
         public void DeleteChatById(int Id)
         {
             var chat = _context.Chats.Where(chat => chat.Id== Id).FirstOrDefault();
@@ -23,7 +31,23 @@ namespace ChatApp.Data
                 _context.Chats.Remove(chat);
             }
         }
+        public void DeleteTimeRegistrationById(int Id)
+        {
+            var tr = _context.TimeRegistrations.Where(chat => chat.Id == Id).FirstOrDefault();
+            if (tr != null)
+            {
+                _context.TimeRegistrations.Remove(tr);
+            }
+        }
 
+        public void DeleteChannelProfile(int Id)
+        {
+            var channelProfile = _context.ChannelProfiles.Where(c => c.ProfileId == Id.ToString()).FirstOrDefault();
+            if (channelProfile != null)
+            {
+                _context.ChannelProfiles.Remove(channelProfile);
+            }
+        }
         public void DeleteGroupById(int Id)
         {
             var group = _context.Groups.Where(group => group.Id == Id).FirstOrDefault();
@@ -31,6 +55,12 @@ namespace ChatApp.Data
             {
                 _context.Groups.Remove(group);
             }
+        }
+        public void DeleteChatProfileById(int Id)
+        {
+            var chatprofile = _context.ChannelProfiles.Where(x => x.ChannelId == Id).FirstOrDefault();
+            _context.ChannelProfiles.Remove(chatprofile);
+            _context.SaveChanges();
         }
 
         public void DeleteMessageById(int Id)
@@ -50,7 +80,10 @@ namespace ChatApp.Data
                 _context.Profiles.Remove(Profile);
             }
         }
-
+        public IEnumerable<TimeRegistration> GetAllTimeRegistrations()
+        {
+            return _context.TimeRegistrations;
+        }
         public IEnumerable<Chat> GetAllChats()
         {
             return _context.Chats;
@@ -78,7 +111,14 @@ namespace ChatApp.Data
         {
             return _context.Channels;
         }
-
+        public IEnumerable<ChannelProfile> GetAllChannelProfiles()
+        {
+            return _context.ChannelProfiles;
+        }
+        public void InsertTimeRegistration(TimeRegistration tr)
+        {
+            _context.TimeRegistrations.Add(tr);
+        }
         public void InsertChat(Chat chat)
         {
             _context.Chats.Add(chat);
@@ -112,22 +152,19 @@ namespace ChatApp.Data
             _context.SaveChanges();
         }
 
-        public IEnumerable<ChatProfile> GetAllChatProfiles()
+        public IEnumerable<ChannelProfile> GetAllChannelProfiles(int channelId)
         {
-            return _context.ChatProfiles;
+            return _context.ChannelProfiles;
         }
 
-        public void DeleteChatProfile(int Id)
+
+
+        public void InsertChannelProfile(ChannelProfile channelProfile)
         {
-            var  chatprofile = _context.ChatProfiles.Where(x=>x.ChatId==Id).FirstOrDefault();
-            _context.ChatProfiles.Remove(chatprofile);
+            _context.ChannelProfiles.Add(channelProfile);
             _context.SaveChanges();
         }
 
-        public void InsertChatProfile(ChatProfile chatProfile)
-        {
-            _context.ChatProfiles.Add(chatProfile);
-            _context.SaveChanges();
-        }
+
     }
 }

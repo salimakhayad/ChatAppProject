@@ -1,23 +1,117 @@
 ﻿/* Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
 for details on configuring this project to bundle and minify static web assets. */
+button .centered
+{
+    position: absolute;
+    top: 35%;
+    left: 20%;
+    height: 50px;
+    width: 50px;
+    border-radius: 50%;
+}
+
+.list-group-item
+{
+    display:flex;
+    border: solid #f8f9fa;
+}
+.centered {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+.card
+{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    word-wrap: break-word;
+    background-color: #fff;
+    background-clip: border-box;
+    border: 1px solid rgba(0,0,0,.125);
+    border-radius: .25rem;
+}
+.group
+{
+    position: relative;
+}
+.flexbox-item .title span {
+    margin-left: 34%;
+}
+
+.flexbox-item .title {
+    width: 100%;
+    margin-top: 4%;
+    background-color: cornflowerblue;
+}
+.user
+{
+    width: 100%;
+    margin-top: 4%;
+    background-color: #ac499e;
+}
+.user span {
+    margin-left: 34%;
+}
+li a {
+    display: block;
+    width: 100%;
+}
+
+button {
+    display: block;
+    
+}
+footer {
+    margin-top: 20%;
+}
+
 .channelText form button {
     width: 100%;
     margin-top: 4%;
 }
+div.channelText.groupname span {
+    margin-left: 30%;
+}
+.groupname {
+    width: 100%;
+    margin-top: 4%;
+
+}
+groupname
 #groupTitle {
-    color:whitesmoke;
-    
+    color: whitesmoke;
 }
 .messages {
     flex-grow: 1;
-    display: flex;
+    max-height:75%;
     padding-bottom: 1rem;
-    overflow: auto;
+    overflow-y: auto;
+    margin-bottom: -50%;
 }
 .message {
     display: flex;
     flex-direction: row;
     margin-top: 0.2rem;
+}
+.message > p {
+        margin: 0;
+        flex-grow: 5;
+}
+.message > p {
+       color:white;
+}
+.message > header {
+        color: white;
+}
+.message > small {
+        color: white;
+}
+    
+header {
+    margin-right:5%;
 }
 #groupTitle {
     text-align: center;
@@ -40,11 +134,17 @@ for details on configuring this project to bundle and minify static web assets. 
     min-height: 200px;
     flex-grow: 2;
 
+
 }
 .flexbox-item-3 {
     min-height: 300px;
     flex-shrink: 0;
 }
+    .flexbox-item-3 a {
+        color: white !important;
+        text-align: center !important;
+        margin-left: 30%;
+    }
 
 #wrapper {
     height: 100vh;
@@ -75,6 +175,8 @@ li.channelText {
     overflow: auto;
 }
 .chat-input {
+    position: relative;
+    top: 80%;
     display: none;
     background-color: #40444b;
     min-height: 70px;
@@ -84,9 +186,6 @@ li.channelText {
     display: flex;
     flex-direction: row;
     padding: 1rem;
-    position: relative;
-    bottom: 0px;
-    top: 70%;
 }
 .chat-input > input {
        
@@ -95,7 +194,12 @@ li.channelText {
 .chat-input > button {
     flex-grow: 1;
 }
-
+.chat {
+    flex-grow:1;
+    display:flex;
+    flex-direction:column;
+    max-height:100%;
+}
 dl, ol, ul {
     margin-top: 0px;
     margin-bottom: 1rem;
@@ -112,76 +216,95 @@ body {
     line-height: 1.5;
     color: #858796;
     text-align: left;
-} 
-
-
-
-
-
-
-/* Provide sufficient contrast against white background */
-a {
-  color: #0366d6;
 }
 
-.btn-primary {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
-}
+@media only screen and (max-width: 1210px) {
+    .chat-input {
+        top: 65%;
+    }
+    .title span {
+        margin-left:0%;
+    }
 
-.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
-  padding:3%;
-}
+    @media only screen and (max-width: 1000px) {
+        #message-input {
+            width: 60%;
+        }
+        .chat-input {
+           top:30%;
+        }
 
-/* Sticky footer styles
+        .title span {
+            margin-left: 0%;
+        }
+        
+
+
+
+
+        /* Provide sufficient contrast against white background */
+        a {
+            color: #0366d6;
+        }
+
+        .btn-primary {
+            color: #fff;
+            background-color: #1b6ec2;
+            border-color: #1861ac;
+        }
+
+        .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+            color: #fff;
+            background-color: #1b6ec2;
+            border-color: #1861ac;
+            padding: 3%;
+        }
+
+        /* Sticky footer styles
 -------------------------------------------------- */
-html {
-  font-size: 14px;
-}
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
+        html {
+            font-size: 14px;
+        }
 
-.border-top {
-  border-top: 1px solid #e5e5e5;
-}
-.border-bottom {
-  border-bottom: 1px solid #e5e5e5;
-}
 
-.box-shadow {
-  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
-}
 
-button.accept-policy {
-  font-size: 1rem;
-  line-height: inherit;
-}
+        .border-top {
+            border-top: 1px solid #e5e5e5;
+        }
 
-/* Sticky footer styles
+        .border-bottom {
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .box-shadow {
+            box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+        }
+
+        button.accept-policy {
+            font-size: 1rem;
+            line-height: inherit;
+        }
+
+        /* Sticky footer styles
 -------------------------------------------------- */
-html {
-  position: relative;
-  min-height: 100%;
-}
-img {
-    border-radius: 35%;
-}
-li {
-    float: left;
-}
-ul {
-    list-style-type: none;
-}
-.Profile {
-    display: inline-block;
-}
+        html {
+            position: relative;
+            min-height: 100%;
+        }
 
+        img {
+            border-radius: 35%;
+        }
 
+        li {
+            float: left;
+        }
+
+        ul {
+            list-style-type: none;
+        }
+
+        .Profile {
+            display: inline-block;
+        }
 

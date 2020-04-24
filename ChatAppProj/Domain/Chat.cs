@@ -15,11 +15,13 @@ namespace ChatApp.Domain
         {
         }
         public int Id { get; set; }
+
         [ForeignKey("Channel")]
         public int ChannelId { get; set; }
         public Channel Channel { get; set; }
+
         public ChatType ChatType { get; set; }
         public ICollection<Message> Messages { get; set; }
-        public ICollection<ChatProfile> ChatProfiles { get; set; }
+        public ICollection<Profile> Profiles { get; set; }
     }
 }

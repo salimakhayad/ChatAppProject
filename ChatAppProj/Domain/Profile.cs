@@ -15,6 +15,7 @@ namespace ChatApp.Domain
          
         }
         public string Name { get; set; }
+        public string EmailAddress { get; set; }
         public string FavouriteColor { get; set; }
         public byte[] ProfilePicture { get; set; }
         public ICollection<Group> Groups { get; set; }

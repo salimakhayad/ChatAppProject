@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using ChatApp.Models.Group;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
-
+using System.IO;
 
 namespace ChatApp.Controllers
 {
@@ -38,7 +38,8 @@ namespace ChatApp.Controllers
         public IActionResult Index()
         {
             GroupIndexModel model = new GroupIndexModel();
-            model.Groups = _chatService.GetAllGroups().ToList();
+            var grps = _chatService.GetAllGroups().ToList();
+            model.Groups = grps.ToList();
             return View(model);
         }
         public IActionResult Join(int groupId)
@@ -62,7 +63,7 @@ namespace ChatApp.Controllers
                 .FirstOrDefault();
 
                 var messages = _chatService.GetAllMessages()
-               .Where(mes => mes.ChannelId == selectedChat.ChannelId);
+               .Where(mes => mes.ChatId == selectedChat.Id);
 
 
                 selectedChat.Messages = messages.ToList();
@@ -108,7 +109,8 @@ namespace ChatApp.Controllers
                 Name = model.Name,
                 Profile = _currentProfile,
                 ProfileId = _currentProfile.Id,
-                ChatProfiles = new List<ChatProfile>(),
+                Content = model.Content,                
+                ChannelProfiles = new List<ChannelProfile>(),
                 Channels = new List<Channel>()
             };
 
@@ -116,6 +118,13 @@ namespace ChatApp.Controllers
             _chatService.SaveChanges();
 
             var groupFromDb = _chatService.GetAllGroups().FirstOrDefault(g => g.Id == newGroup.Id);
+
+            using var memoryStream = new MemoryStream();
+                        model.Photo.CopyTo(memoryStream);
+                        groupFromDb.Photo = memoryStream.ToArray();
+                        
+             _chatService.SaveChanges();
+
             _chatService.InsertChannel( new Channel() {
                                         Name = "Main",
                                         GroupId = groupFromDb.Id,
@@ -139,8 +148,9 @@ namespace ChatApp.Controllers
             {
                 ProfileName = "Server",
                 Text = "Welcome to our Server!",
-                Channel = groupFromDbWithChannel.Channels.FirstOrDefault(),
-                ChannelId = groupFromDbWithChannel.Channels.FirstOrDefault().Id,
+                Chat = chatFromDb,
+                ChatId = chatFromDb.Id,
+                Timestamp = DateTime.Now
              };
 
             _chatService.InsertMessage(msg);
@@ -152,17 +162,7 @@ namespace ChatApp.Controllers
 
             var group = _chatService.GetAllGroups().FirstOrDefault(g => g.Id == newGroup.Id);
             var getAllMessages = _chatService.GetAllMessages();
-            /*
-             *  Channels = new List<Channel>(){
-                                    new Channel() {
-                                        Name = "Main",
-                                        Chat = new Chat() {
-                                            ChatType = ChatType.Group,
-                                            Messages = new List<Message>() {
-                                                            new Message() {
-                                                                ProfileName = "Server",
-                                                                Text = "Welcome to our Server!"} } },}}};
-             */
+   
 
 
             return RedirectToAction("Index");

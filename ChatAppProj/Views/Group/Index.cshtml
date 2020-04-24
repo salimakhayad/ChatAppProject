@@ -1,27 +1,33 @@
 ﻿@using ChatApp.Models.Group;
+@using ChatApp.Domain;
 @model GroupIndexModel
 @if (@Model.Groups != null)
 {
     <div class="container">
+        <h2>Groups</h2>
         <ul class="list-group list-group-horizontal">
             @foreach (var group in @Model.Groups)
             {
-                
-                    <li class="list-group-item p-3 col-3">
-                        <form asp-controller="Group" asp-action="Join" asp-route-groupId="@group.Id">
-                            <button type="submit"> @group.Id : @group.Name</button>
-                        </form>
-                    </li>
-               
+
+                <div class="card col-4" style="width: 18rem;">
+                    <image width="250" height="250" src="@String.Format("data:image/gif;base64,{0}", Convert.ToBase64String(@group.Photo))"/>
+                    <div class="card-body">
+                      <h5 class="card-title">@group.Name</h5>
+                      <p class="card-text">@group.Content</p>
+                      <form asp-controller="Group" asp-action="Join" asp-route-groupId="@group.Id">
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-sign-in-alt"></i></button>
+                    </form>
+                    </div>
+                  </div>
             }
+            <li class="list-group-item p-3 col-2">
+                <a asp-action="Create" class="btn btn-warning" asp-controller="Group">Add Group</a>
+            </li>
         </ul>
 
+       
 
-            <div class="row justify-content-end">
-                <a asp-action="Create" class="btn btn-warning" asp-controller="Group">Add Group</a>
-            </div>
-
-</div>
+    </div>
 }
 
 

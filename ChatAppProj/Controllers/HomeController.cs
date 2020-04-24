@@ -48,7 +48,9 @@ namespace ChatApp.Controllers
             {
                 model.Profiles = profilesFromDb;
             }
-            var groupsFromDb = _chatService.GetAllGroups().ToList();
+            var groupsFromDb = _chatService.GetAllGroups()
+                                           
+                                            .ToList();
             if (groupsFromDb != null)
             {
                 model.ChatGroups = groupsFromDb;
@@ -87,7 +89,8 @@ namespace ChatApp.Controllers
                     {
                         Id = Guid.NewGuid().ToString(),
                         UserName = model.UserName,
-                        FavouriteColor = "Dark Orange"
+                        EmailAddress = model.EmailAddress,
+                        FavouriteColor = "Dark Orange"                       
                     };
                     var identityResult = await _userManager.CreateAsync(user, model.Password);
                     if (identityResult.Succeeded)
@@ -119,6 +122,8 @@ namespace ChatApp.Controllers
             if (ModelState.IsValid)
             {
                 var user = await _userManager.FindByNameAsync(model.UserName);
+                // var user = await _userManager.FindByNameAsync(model.UserName);
+                
 
                 if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
                 {

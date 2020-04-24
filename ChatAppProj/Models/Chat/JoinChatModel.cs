@@ -7,9 +7,8 @@ namespace ChatApp.Models.Chat
 {
     public class JoinChatModel
     {
-        public int groupId { get; set; }
-        public int channelId { get; set; }
-
+        public string connectionId { get; set; }
+        public string channelId { get; set; }
 
     }
 }
