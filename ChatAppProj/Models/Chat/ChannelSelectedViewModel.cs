@@ -12,10 +12,12 @@ namespace ChatApp.Models.Group
         public int Id { get; set; }
         public string Name { get; set; }
         public string ProfileId { get; set; }
+        public string OwnerId { get; set; }
         public Domain.Profile Profile { get; set; }
         // public byte[] Photo { get; set; }
         public ChatApp.Domain.Channel SelectedChannel { get; set; }
         public virtual ICollection<Domain.Channel> Channels { get; set; }
+        public ChatApp.Domain.Group Group { get; set; }
 
     }
 }

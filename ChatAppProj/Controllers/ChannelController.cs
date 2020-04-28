@@ -37,6 +37,7 @@ namespace ChatApp.Controllers
        
         public IActionResult JoinChannel(int channelId)
         {
+            // set viewbag => Channel - nameOfChannel
             ChannelSelectedViewModel model = new ChannelSelectedViewModel();
  
             var profileId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
@@ -46,10 +47,14 @@ namespace ChatApp.Controllers
                   .FirstOrDefault(c => c.Id == channelId);
 
             var currentGroup = _chatService.GetAllGroups().FirstOrDefault(g => g.Channels.Contains(selectedChannel));
+           
             var channels = _chatService.GetAllChannels()
                   .Where(c => c.GroupId == currentGroup.Id);
 
+            // if user is owner
 
+            model.OwnerId = currentGroup.ProfileId;
+            
 
             // if user hasnt joined yet
             var userAlrdyJoined = _chatService.GetAllChannelProfiles().Where(c => c.ChannelId == channelId).Where(c => c.ProfileId == profile.Id).Any();
@@ -100,13 +105,13 @@ namespace ChatApp.Controllers
                 
                 
             }
-      
-            
 
+
+            model.Group = currentGroup;
             model.Channels = channels.ToList();
             model.Name = currentGroup.Name;
             model.Profile = profile;
-            model.ProfileId = currentGroup.ProfileId;
+            model.ProfileId = profile.Id;
             model.SelectedChannel = selectedChannel;
             model.Id = currentGroup.Id;
         
@@ -118,6 +123,7 @@ namespace ChatApp.Controllers
       
         public IActionResult CreateGet(int groupId)
         {
+            // set viewbag => Channel - Create
             var groupFromDb = _chatService.GetAllGroups().FirstOrDefault(g => g.Id == groupId);
 
             CreateChannelModel model = new CreateChannelModel()

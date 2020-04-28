@@ -30,7 +30,7 @@ namespace ChatApp.Data
             {
                 foreignKey.DeleteBehavior = DeleteBehavior.Restrict;
             }
-
+   
             modelBuilder.Entity<ChannelProfile>()
                 .HasKey(x => new { x.ChannelId, x.ProfileId });
 

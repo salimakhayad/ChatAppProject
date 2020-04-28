@@ -39,18 +39,7 @@ namespace ChatApp.Controllers
             this._userStore = userStore;
             this._signInManager = signInManager;
         }
-        [HttpGet("{id}")]
-        public IActionResult Chat(int id)
-        {
-            var chats = _chatService.GetAllChats();
-            IQueryable<Chat> IQueryableChats = chats.AsQueryable();
-
-
-            var chat = IQueryableChats
-            .Include(x => x.Messages)
-           .FirstOrDefault(x => x.Id == id);
-            return View(chat);
-        }
+        
         [HttpPost]
         public async Task<IActionResult> CreateMessage(int chatId, string message)
         {
@@ -75,7 +64,7 @@ namespace ChatApp.Controllers
         [HttpPost("[action]/{connectionId}/{channelId}")]
         public async Task<IActionResult> JoinChannel(string connectionId, string channelId)
         {
-            await _chat.Groups.AddToGroupAsync(connectionId, channelId);
+             await _chat.Groups.AddToGroupAsync(connectionId, channelId);
 
 
             var chat = _chatService.GetAllChats().FirstOrDefault(c => c.ChannelId.ToString() == channelId);
@@ -105,17 +94,17 @@ namespace ChatApp.Controllers
             _chatService.InsertTimeRegistration(timeregistration);
             _chatService.SaveChanges();
 
-            var trs = _chatService.GetAllTimeRegistrations().Where(tr => tr.ChatId == chat.Id&&tr.TimeLeft==null);
-            var usersCurrentlyOnline = new List<string>();
-            foreach (var tr in trs)
-            {
-                var user = _chatService.GetAllProfiles().FirstOrDefault(p => p.Id == tr.ProfileId);
-                usersCurrentlyOnline.Add(user.UserName);
-            }
-
-             await _chat.Clients.Group(chat.Id.ToString()).
-             SendAsync("UpdateUsersOnline", usersCurrentlyOnline)
-             ;
+           var trs = _chatService.GetAllTimeRegistrations().Where(tr => tr.ChatId == chat.Id&&tr.TimeLeft==null);
+           var usersCurrentlyOnline = new List<string>();
+           foreach (var tr in trs)
+           {
+               var user = _chatService.GetAllProfiles().FirstOrDefault(p => p.Id == tr.ProfileId);
+               usersCurrentlyOnline.Add(user.UserName);
+           }
+           
+            await _chat.Clients.Group(chat.Id.ToString()).
+            SendAsync("UpdateUsersOnline", usersCurrentlyOnline)
+            ;
 
 
             return Ok();

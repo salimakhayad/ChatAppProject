@@ -29,10 +29,10 @@
                     </div>
                 }
             </div>
+          
             <form id="inputsendmessage" class="chat-input" onsubmit="sendMessage(event)" asp-controller="Chat" asp-action="CreateMessage">
                 <input type="hidden" name="chatId" value="@Model.SelectedChannel.Chat.Id" />
                 <input type="text" name="message" id="message-input" autofocus /><!-- onkeyup='saveValue(this)'-->
-                
                 <button type="submit"> Send</button>
             </form>
         </div>
@@ -56,9 +56,22 @@ var element = document.getElementById('messageDiv');
 element.scrollTop = element.scrollHeight;
 }
 
+
 // grab username
-var username = "@Html.Raw(Model.Profile.UserName)";
-           
+
+    var isOwner = new Boolean(false);
+    var username = "@Html.Raw(Model.Profile.UserName)";
+    var string1 = "@Model.OwnerId";
+    var string2 = "@Model.Profile.Id";
+    var result = string1.localeCompare(string2);
+   
+if (result==0)
+{
+   isOwner = true;
+}
+
+
+// make connection
 var _connectionId = '';
 var connection = new signalR.HubConnectionBuilder()
      .withUrl("/chatHub")
@@ -66,7 +79,7 @@ var connection = new signalR.HubConnectionBuilder()
 connection.serverTimeoutInMilliseconds = 100000; // 100 second
 
     
-
+// start
 connection.start()
    .then(function(){
      connection.invoke('getConnectionId')
@@ -78,8 +91,8 @@ connection.start()
         .catch(function(err){
             console.log(err)
         });
-        
 
+// enable input for chat
 function ToggleInput() {
     var x = document.getElementById("inputsendmessage");
     if (x.style.display === "none") {
@@ -87,9 +100,9 @@ function ToggleInput() {
     } else {
         x.style.display = "none";
     }
-}
-
-var joinChannel = function () {
+    }
+ // join channel
+    var joinChannel = function () {
     var url = '/Chat/JoinChannel/' + _connectionId + '/@Model.Id'
     axios.post(url, null)
         .then(res => {
@@ -99,10 +112,13 @@ var joinChannel = function () {
         .catch(err => {
             console.log("Failed to join Channel!", err);
         })
-}
+    }
 
-connection.on("UserJoinedChannel", function (data) {
-      // show msg in chat
+// event - UserJoinedChannel
+    connection.on("UserJoinedChannel", function (data) {
+        
+         debugger;
+// event // show msg in chat
     var message = document.createElement("div");
     message.classList.add('message');
 
@@ -122,23 +138,27 @@ connection.on("UserJoinedChannel", function (data) {
 
       document.getElementById("messageDiv").append(message)
 
-  // display user right column
+ // event // display user right column
     var username = data.name;
     var element = document.getElementsByClassName('flexbox-item flexbox-item-3');
-            var divElement = document.createElement("div");
-            var spanElement = document.createElement("span");
-            spanElement.innerText = username;
+    var divElement = document.createElement("div");
+    var spanElement = document.createElement("span");
+    
+// if user is owner
+
+     spanElement.innerText = username;
+     if (result==0)
+        {
+          spanElement.innerText+=" (owner) ";
+        }
             divElement.appendChild(spanElement);
             divElement.classList.add("user");
             element[0].appendChild(divElement);
             var children = document.getElementsByClassName('flexbox-item flexbox-item-3');
-
-
-
   });
 
 connection.on("ReceiveMessage", function (data) {
-    
+     debugger;
     var message = document.createElement("div");
     message.classList.add('message');
 
@@ -162,7 +182,7 @@ connection.on("ReceiveMessage", function (data) {
        
     console.log('data', data);
 
-    debugger;
+    
     var message = document.createElement("div");
     message.classList.add('message');
 
@@ -184,6 +204,7 @@ connection.on("ReceiveMessage", function (data) {
        
     });
     connection.on("UpdateUsersOnline", function (data) {
+         debugger;
        
         console.log('data', data);
         ClearUsersOnline();
@@ -193,6 +214,7 @@ connection.on("ReceiveMessage", function (data) {
        
     });
     var ClearUsersOnline = function () {
+         debugger;
         var element = document.getElementsByClassName('flexbox-item flexbox-item-3')[0];
         element.innerHTML = '';
         var div = document.createElement("div");
@@ -206,22 +228,28 @@ connection.on("ReceiveMessage", function (data) {
     }
     var addUser = function (data)
     {
-   
-
+    var string1 = "@Model.OwnerId";
+    var string2 = "@Model.Profile.Id";
+    var result = string1.localeCompare(string2);
+        debugger;
     var element = document.getElementsByClassName('flexbox-item flexbox-item-3');
-            var divElement = document.createElement("div");
-            var spanElement = document.createElement("span");
-            spanElement.innerText = data;
-            divElement.appendChild(spanElement);
-            divElement.classList.add("user");
-            element[0].appendChild(divElement);
-            var children = document.getElementsByClassName('flexbox-item flexbox-item-3');
+    var divElement = document.createElement("div");
+    var spanElement = document.createElement("span");
+    spanElement.innerText = data;
+    if (result==0){
+            spanElement.innerText += " (owner) ";
+        }
+
+     divElement.appendChild(spanElement);
+     divElement.classList.add("user");
+     element[0].appendChild(divElement);
+     var children = document.getElementsByClassName('flexbox-item flexbox-item-3');
     }
 
 var sendMessage = function(event)
         {
             event.preventDefault();
-
+         debugger;
             var data = new FormData(event.target);
             document.getElementById('message-input').value = '';
             axios.post('/Chat/SendMessage',data)

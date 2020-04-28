@@ -19,7 +19,22 @@ namespace ChatApp.Hubs
         {
             _claimsPrincipalFactory = claimsPrincipalFactory;
             _chatService = service;
+            ClearUnexpectedDisconnects();
         }
+
+        private void ClearUnexpectedDisconnects()
+        {
+            var trs = _chatService.GetAllTimeRegistrations();
+            foreach (var tir in trs)
+            {
+                if (tir.TimeLeft == null)
+                {
+                    tir.TimeLeft = DateTime.Now;
+                }
+            }
+            _chatService.SaveChanges();
+        }
+
         public string GetConnectionId() => Context.ConnectionId;
     
         public override Task OnConnectedAsync()
