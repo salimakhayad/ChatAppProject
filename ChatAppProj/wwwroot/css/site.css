@@ -1,5 +1,34 @@
 ﻿/* Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
 for details on configuring this project to bundle and minify static web assets. */
+
+gifInputString {
+
+}
+
+.gifIcon:hover, .custom-file-upload:hover, .user:hover {
+    filter: brightness(130%);
+    font-size: 14px;
+    font-variant: small-caps;
+}
+img#gifImg {
+    height:100%;
+}
+label.custom-file-upload {
+    height: 100%;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.custom-file-upload {
+    border: 1px solid #ccc;
+    display: inline-block;
+    padding: 6px 12px;
+    cursor: pointer;
+    background-color:grey;
+}
+
 button .centered
 {
     position: absolute;
@@ -85,8 +114,7 @@ groupname
     color: whitesmoke;
 }
 .messages {
-    flex-grow: 1;
-    max-height:75%;
+    max-height:90%;
     padding-bottom: 1rem;
     overflow-y: auto;
     margin-bottom: -50%;
@@ -121,7 +149,7 @@ header {
 }
 .flexbox-item {
     width: 200px;
-    margin: 10px;
+   
     border: 3px solid #333;
     background-color: #40444b;
 }
@@ -133,8 +161,13 @@ header {
 .flexbox-item-2 {
     min-height: 200px;
     flex-grow: 2;
-
-
+    height: 70%;
+    max-height: 70%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 70vh;
+    
 }
 .flexbox-item-3 {
     min-height: 300px;
@@ -176,7 +209,7 @@ li.channelText {
 }
 .chat-input {
     position: relative;
-    top: 80%;
+    top: 78%;
     display: none;
     background-color: #40444b;
     min-height: 70px;
@@ -218,93 +251,102 @@ body {
     text-align: left;
 }
 
-@media only screen and (max-width: 1210px) {
+
+
+@media screen and (min-width:1321px) and (max-width:1900px) {
     .chat-input {
-        top: 65%;
+        top: 89%;
+        padding-left: 0px;
+        position: sticky;
     }
-    .title span {
-        margin-left:0%;
+}
+
+@media screen and (min-width:1090px) and (max-width:1321px) {
+    .chat-input {
+        top: 89%;
+        padding-left: 0%;
+        position:sticky;
     }
-
-    @media only screen and (max-width: 1000px) {
-        #message-input {
-            width: 60%;
-        }
-        .chat-input {
-           top:30%;
-        }
-
-        .title span {
-            margin-left: 0%;
-        }
-        
+}
+@media screen and (min-width:600px) and (max-width:1090px) {
+    #message-input {
+        width:40%;
+    }
+    .chat-input {
+        padding-left: 0%;
+        top: 94%;
+        position:sticky;
+    }
+}
 
 
 
 
-        /* Provide sufficient contrast against white background */
-        a {
-            color: #0366d6;
-        }
 
-        .btn-primary {
-            color: #fff;
-            background-color: #1b6ec2;
-            border-color: #1861ac;
-        }
+                    /* Provide sufficient contrast against white background */
+                    a {
+                        color: #0366d6;
+                    }
 
-        .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
-            color: #fff;
-            background-color: #1b6ec2;
-            border-color: #1861ac;
-            padding: 3%;
-        }
+                    .btn-primary {
+                        color: #fff;
+                        background-color: #1b6ec2;
+                        border-color: #1861ac;
+                    }
 
-        /* Sticky footer styles
+                    .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+                        color: #fff;
+                        background-color: #1b6ec2;
+                        border-color: #1861ac;
+                        padding: 3%;
+                    }
+
+                    /* Sticky footer styles
 -------------------------------------------------- */
-        html {
-            font-size: 14px;
-        }
+                    html {
+                        font-size: 14px;
+                    }
 
 
 
-        .border-top {
-            border-top: 1px solid #e5e5e5;
-        }
+                    .border-top {
+                        border-top: 1px solid #e5e5e5;
+                    }
 
-        .border-bottom {
-            border-bottom: 1px solid #e5e5e5;
-        }
+                    .border-bottom {
+                        border-bottom: 1px solid #e5e5e5;
+                    }
 
-        .box-shadow {
-            box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
-        }
+                    .box-shadow {
+                        box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+                    }
 
-        button.accept-policy {
-            font-size: 1rem;
-            line-height: inherit;
-        }
+                    button.accept-policy {
+                        font-size: 1rem;
+                        line-height: inherit;
+                    }
 
-        /* Sticky footer styles
+                    /* Sticky footer styles
 -------------------------------------------------- */
-        html {
-            position: relative;
-            min-height: 100%;
-        }
+                    html {
+                        position: relative;
+                        min-height: 100%;
+                    }
 
-        img {
-            border-radius: 35%;
-        }
+                    img {
+                        border-radius: 35%;
+                    }
 
-        li {
-            float: left;
-        }
+                    li {
+                        float: left;
+                    }
 
-        ul {
-            list-style-type: none;
-        }
+                    ul {
+                        list-style-type: none;
+                    }
 
-        .Profile {
-            display: inline-block;
-        }
+                    .Profile {
+                        display: inline-block;
+                    }
+                
 

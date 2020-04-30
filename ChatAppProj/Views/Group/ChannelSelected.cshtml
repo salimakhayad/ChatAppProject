@@ -2,270 +2,399 @@
 @using System.Security.Claims;
 @using ChatApp.Models.Group;
 
-    <div class="flexbox-container">
-        <div class="flexbox-item flexbox-item-1">
-            <div class="title">
-                <span>@Model.Name</span>
+<div class="flexbox-container">
+    <!--Channels-->
+    <div class="flexbox-item flexbox-item-1">
+        <div class="title">
+            <span>@Model.Name</span>
+        </div>
+
+        @foreach (var channel in Model.Channels)
+        {
+            <div class="channelText">
+                <form asp-action="JoinChannel" asp-controller="Channel" asp-route-channelId="@channel.Id">
+                    <button type="submit"><span>@channel.Name</span></button>
+                </form>
             </div>
-            @foreach (var channel in Model.Channels)
+        }
+
+    </div>
+    <div class="flexbox-item flexbox-item-2">
+        <!--Messages-->
+        <div id="messageDiv" class="messages">
+
+            @foreach (var message in Model.SelectedChannel.Chat.Messages)
             {
-                <div class="channelText">
-                    <form asp-action="JoinChannel" asp-controller="Channel" asp-route-channelId="@channel.Id">
-                        <button type="submit"><span>@channel.Name</span></button>
-                    </form>
+                <div class="message">
+                    <header>@message.ProfileName</header>
+                    <p>@message.Text</p>
+                    <small>@message.Timestamp.ToShortTimeString()</small>
                 </div>
             }
-
         </div>
-        <div class="flexbox-item flexbox-item-2">
-            <div id="messageDiv" class="messages">
 
-                @foreach (var message in Model.SelectedChannel.Chat.Messages)
-                {
-                    <div class="message">
-                        <header>@message.ProfileName</header>
-                        <p>@message.Text</p>
-                        <small>@message.Timestamp.ToShortTimeString()</small>
-                    </div>
-                }
-            </div>
-          
-            <form id="inputsendmessage" class="chat-input" onsubmit="sendMessage(event)" asp-controller="Chat" asp-action="CreateMessage">
-                <input type="hidden" name="chatId" value="@Model.SelectedChannel.Chat.Id" />
-                <input type="text" name="message" id="message-input" autofocus /><!-- onkeyup='saveValue(this)'-->
-                <button type="submit"> Send</button>
-            </form>
-        </div>
-        <div class="flexbox-item flexbox-item-3">
-            <div class="title">
-                <span>Online</span>
-            </div>
-            
+        <form id="inputsendmessage" class="chat-input" onsubmit="sendMessage(event)" asp-controller="Chat" asp-action="CreateMessage">
+            <input type="hidden" name="chatId" value="@Model.SelectedChannel.Chat.Id" />
+            <!--File upload-->
+            <label for="file-upload" class="custom-file-upload">
+                <img src="~/icons/upload-files-icon.png" alt="upload-files-icon" />
+                <input type="file" id="file-input" />
+            </label>
+            <input id="file-upload" type="file" />
 
 
-        </div>
+            <input type="text" name="message" id="message-input" autofocus />
+
+            <!--Gif-->
+            <a id="UseGifs" class="gifIcon">
+                <img src="~/icons/gif-icon.png" id="gifImg" alt="gif-icon" />
+            </a>
+
+
+
+        </form>
     </div>
-    @section scripts
+    <div class="flexbox-item flexbox-item-3">
+        <!--Users in channel-->
+        <div class="title">
+            <span>Online</span>
+        </div>
+
+
+
+    </div>
+</div>
+@section scripts
     {
 
-<script> 
-// scroll msg div to the bottom
-window.onload=function () {
-document.getElementById("inputsendmessage").style="block";
-var element = document.getElementById('messageDiv');
-element.scrollTop = element.scrollHeight;
-}
+
+    <script>
+        
 
 
-// grab username
 
-    var isOwner = new Boolean(false);
-    var username = "@Html.Raw(Model.Profile.UserName)";
-    var string1 = "@Model.OwnerId";
-    var string2 = "@Model.Profile.Id";
-    var result = string1.localeCompare(string2);
-   
-if (result==0)
-{
-   isOwner = true;
-}
+        var api = "https://api.giphy.com/v1/gifs/search?";
+        var apiKey = "&api_key=JAyUkMRhLZ0mPD6luVhc0AP1EE4zxIbk"
+        var query = "&q=rainbow";
+        var searchResultsGif;
 
+        function setup() {
+            noCanvas();
+            var url = api + apiKey + query;
+            loadJSON(url, gotData);
+        }
+        function gotData(data) {
+            searchResultsGif = data;
+            console.log(data);
+          
+        }
 
-// make connection
-var _connectionId = '';
-var connection = new signalR.HubConnectionBuilder()
-     .withUrl("/chatHub")
-     .build();
-connection.serverTimeoutInMilliseconds = 100000; // 100 second
-
+         // jquery -  click on gif event
+        $(function () {
+            $('#UseGifs').on('click', function () {
     
-// start
-connection.start()
-   .then(function(){
-     connection.invoke('getConnectionId')
-       .then(function(connectionId){
-          _connectionId = connectionId
-          joinChannel();
-            })
-        })
-        .catch(function(err){
-            console.log(err)
+            var messagesNode = document.getElementById("messageDiv");
+                messagesNode.innerHTML = '';
+
+                ShowTopTenGifs();
+ 
+            });
+
         });
-
-// enable input for chat
-function ToggleInput() {
-    var x = document.getElementById("inputsendmessage");
-    if (x.style.display === "none") {
-        x.style.display = "block";
-    } else {
-        x.style.display = "none";
-    }
-    }
- // join channel
-    var joinChannel = function () {
-    var url = '/Chat/JoinChannel/' + _connectionId + '/@Model.Id'
-    axios.post(url, null)
-        .then(res => {
-            console.log("Channel Joined!", res);
-            
-        })
-        .catch(err => {
-            console.log("Failed to join Channel!", err);
-        })
-    }
-
-// event - UserJoinedChannel
-    connection.on("UserJoinedChannel", function (data) {
-        
-         debugger;
-// event // show msg in chat
-    var message = document.createElement("div");
-    message.classList.add('message');
-
-    var header = document.createElement("header");
-    header.appendChild(document.createTextNode(data.name));
-
-    var p = document.createElement("p");
-    p.appendChild(document.createTextNode(data.text));
-
-    var small = document.createElement("small");
-    var text = data.timestamp;
-    small.appendChild(document.createTextNode(text));
-
-    message.appendChild(header);
-    message.appendChild(p);
-    message.appendChild(small);
-
-      document.getElementById("messageDiv").append(message)
-
- // event // display user right column
-    var username = data.name;
-    var element = document.getElementsByClassName('flexbox-item flexbox-item-3');
-    var divElement = document.createElement("div");
-    var spanElement = document.createElement("span");
-    
-// if user is owner
-
-     spanElement.innerText = username;
-     if (result==0)
+        var ShowTopTenGifs = function ()
         {
-          spanElement.innerText+=" (owner) ";
+          
+            var i = 0;
+            for (i; i < 15;i++)
+            {
+                var url = searchResultsGif.data[i].images.original.url;
+                var image = document.createElement("img");
+                image.width = 250;
+                image.height = 250;
+                image.src = url;
+
+                var messagesNode = document.getElementById("messageDiv");
+                messagesNode.appendChild(image);
+
+            }
+
+            hideChatInputElements();
+
+            addSearchInput();
+
+
         }
-            divElement.appendChild(spanElement);
-            divElement.classList.add("user");
-            element[0].appendChild(divElement);
-            var children = document.getElementsByClassName('flexbox-item flexbox-item-3');
-  });
+         //hide chat input elements
+        var hideChatInputElements = function ()
+        {
+            var chatinput = document.getElementById("message-input");
+            chatinput.style.display = "none";
 
-connection.on("ReceiveMessage", function (data) {
-     debugger;
-    var message = document.createElement("div");
-    message.classList.add('message');
+              var gificon = document.getElementById("gifImg");
+            gificon.style.display = "none";
 
-    var header = document.createElement("header");
-    header.appendChild(document.createTextNode(data.name));
+            var fileIcon = document.getElementById("file-upload");
+            fileIcon.style.display = "none";
 
-    var p = document.createElement("p");
-    p.appendChild(document.createTextNode(data.text));
+            var filelLabel = document.getElementsByClassName("custom-file-upload")[0];
+            filelLabel.style.display = "none";
 
-    var small = document.createElement("small");
-    var text = data.timestamp;
-    small.appendChild(document.createTextNode(text));
 
-    message.appendChild(header);
-    message.appendChild(p);
-    message.appendChild(small);
+            // <input type="text" name="message" id="message-input" autofocus="">
 
-    document.getElementById("messageDiv").append(message)
-});
-     connection.on("UserLeftChannel", function (data) {
-       
-    console.log('data', data);
+            // <form >
+            //        <button type="submit"><span>channel.Name</span></button>
+            // </form>
 
-    
-    var message = document.createElement("div");
-    message.classList.add('message');
+        
 
-    var header = document.createElement("header");
-    header.appendChild(document.createTextNode("server"));
-
-    var p = document.createElement("p");
-         p.appendChild(document.createTextNode(data + ' went offline. '));
-
+        }
    
 
-    message.appendChild(header);
-    message.appendChild(p);
+        // add search input
+         var addSearchInput = function ()
+        {
+             
+            var searchGifInputElement = document.createElement("input");
+            searchGifInputElement.name = "gif";
+             searchGifInputElement.id = "gifInputString";
+             searchGifInputElement.innerText = "rainbow";
+
+             
+
+             // setup()
+             searchGifInputElement.onclick = function (element)
+             {
+                 
+                 var searchString = element.value;
+                 //updateQueryAndData(this.);
+             }
 
 
-    document.getElementById("messageDiv").append(message)
-
-        
-       
-    });
-    connection.on("UpdateUsersOnline", function (data) {
-         debugger;
-       
-        console.log('data', data);
-        ClearUsersOnline();
-        data.forEach(element => addUser(element));
-
-        
-       
-    });
-    var ClearUsersOnline = function () {
-         debugger;
-        var element = document.getElementsByClassName('flexbox-item flexbox-item-3')[0];
-        element.innerHTML = '';
-        var div = document.createElement("div");
-        div.classList.add("title");
-        var span = document.createElement("span");
-        span.innerHTML = 'Users';
-        div.appendChild(span);
-        element.appendChild(div);
+             document.getElementById("inputsendmessage").appendChild(searchGifInputElement);
+             var button = document.createElement("button")
 
 
-    }
-    var addUser = function (data)
-    {
-    var string1 = "@Model.OwnerId";
-    var string2 = "@Model.Profile.Id";
-    var result = string1.localeCompare(string2);
-        debugger;
-    var element = document.getElementsByClassName('flexbox-item flexbox-item-3');
-    var divElement = document.createElement("div");
-    var spanElement = document.createElement("span");
-    spanElement.innerText = data;
-    if (result==0){
-            spanElement.innerText += " (owner) ";
         }
 
-     divElement.appendChild(spanElement);
-     divElement.classList.add("user");
-     element[0].appendChild(divElement);
-     var children = document.getElementsByClassName('flexbox-item flexbox-item-3');
-    }
 
-var sendMessage = function(event)
+        // scroll msg div to the bottom
+        window.onload=function () {
+        document.getElementById("inputsendmessage").style="block";
+        var element = document.getElementById('messageDiv');
+            element.scrollTop = element.scrollHeight;
+
+        }
+
+
+        // grab username
+
+            var isOwner = new Boolean(false);
+            var username = "@Html.Raw(Model.Profile.UserName)";
+            var string1 = "@Model.OwnerId";
+            var string2 = "@Model.Profile.Id";
+            var result = string1.localeCompare(string2);
+
+        if (result==0)
         {
-            event.preventDefault();
-         debugger;
-            var data = new FormData(event.target);
-            document.getElementById('message-input').value = '';
-            axios.post('/Chat/SendMessage',data)
-            .then(res=>{
-                console.log("Message Sent!")
+           isOwner = true;
+        }
 
-            })
-            .catch(err=>{
-                console.log("Failed to send message")
 
-            })
-           }  
-                
-                
+        // make connection
+        var _connectionId = '';
+        var connection = new signalR.HubConnectionBuilder()
+             .withUrl("/chatHub")
+             .build();
+        connection.serverTimeoutInMilliseconds = 100000; // 100 second
 
-</script>
-    
-}  
+
+        // start
+        connection.start()
+           .then(function(){
+             connection.invoke('getConnectionId')
+               .then(function(connectionId){
+                  _connectionId = connectionId
+                  joinChannel();
+                    })
+                })
+                .catch(function(err){
+                    console.log(err)
+                });
+
+        // enable input for chat
+        function ToggleInput() {
+            var x = document.getElementById("inputsendmessage");
+            if (x.style.display === "none") {
+                x.style.display = "block";
+            } else {
+                x.style.display = "none";
+            }
+            }
+         // join channel
+            var joinChannel = function () {
+            var url = '/Chat/JoinChannel/' + _connectionId + '/@Model.Id'
+            axios.post(url, null)
+                .then(res => {
+                    console.log("Channel Joined!", res);
+
+                })
+                .catch(err => {
+                    console.log("Failed to join Channel!", err);
+                })
+            }
+
+        // event - UserJoinedChannel
+            connection.on("UserJoinedChannel", function (data) {
+
+
+        // event // show msg in chat
+            var message = document.createElement("div");
+            message.classList.add('message');
+
+            var header = document.createElement("header");
+            header.appendChild(document.createTextNode(data.name));
+
+            var p = document.createElement("p");
+            p.appendChild(document.createTextNode(data.text));
+
+            var small = document.createElement("small");
+            var text = data.timestamp;
+            small.appendChild(document.createTextNode(text));
+
+            message.appendChild(header);
+            message.appendChild(p);
+            message.appendChild(small);
+
+              document.getElementById("messageDiv").append(message)
+
+         // event // display user right column
+            var username = data.name;
+            var element = document.getElementsByClassName('flexbox-item flexbox-item-3');
+            var divElement = document.createElement("div");
+            var spanElement = document.createElement("span");
+
+        // if user is owner
+
+             spanElement.innerText = username;
+             if (result==0)
+                {
+                  spanElement.innerText+=" (owner) ";
+                }
+                    divElement.appendChild(spanElement);
+                    divElement.classList.add("user");
+                    element[0].appendChild(divElement);
+                    var children = document.getElementsByClassName('flexbox-item flexbox-item-3');
+          });
+
+        connection.on("ReceiveMessage", function (data) {
+
+            var message = document.createElement("div");
+            message.classList.add('message');
+
+            var header = document.createElement("header");
+            header.appendChild(document.createTextNode(data.name));
+
+            var p = document.createElement("p");
+            p.appendChild(document.createTextNode(data.text));
+
+            var small = document.createElement("small");
+            var text = data.timestamp;
+            small.appendChild(document.createTextNode(text));
+
+            message.appendChild(header);
+            message.appendChild(p);
+            message.appendChild(small);
+
+            document.getElementById("messageDiv").append(message)
+        });
+             connection.on("UserLeftChannel", function (data) {
+
+            console.log('data', data);
+
+
+            var message = document.createElement("div");
+            message.classList.add('message');
+
+            var header = document.createElement("header");
+            header.appendChild(document.createTextNode("server"));
+
+            var p = document.createElement("p");
+                 p.appendChild(document.createTextNode(data + ' went offline. '));
+
+
+
+            message.appendChild(header);
+            message.appendChild(p);
+
+
+            document.getElementById("messageDiv").append(message)
+
+
+
+            });
+            connection.on("UpdateUsersOnline", function (data) {
+
+
+                console.log('data', data);
+                ClearUsersOnline();
+                data.forEach(element => addUser(element));
+
+
+
+            });
+            var ClearUsersOnline = function () {
+
+                var element = document.getElementsByClassName('flexbox-item flexbox-item-3')[0];
+                element.innerHTML = '';
+                var div = document.createElement("div");
+                div.classList.add("title");
+                var span = document.createElement("span");
+                span.innerHTML = 'Users';
+                div.appendChild(span);
+                element.appendChild(div);
+
+
+            }
+            var addUser = function (data)
+            {
+            var string1 = "@Model.OwnerId";
+            var string2 = "@Model.Profile.Id";
+            var result = string1.localeCompare(string2);
+
+            var element = document.getElementsByClassName('flexbox-item flexbox-item-3');
+            var divElement = document.createElement("div");
+            var spanElement = document.createElement("span");
+            spanElement.innerText = data;
+            if (result==0){
+                    spanElement.innerText += " (owner) ";
+                }
+
+             divElement.appendChild(spanElement);
+             divElement.classList.add("user");
+             element[0].appendChild(divElement);
+             var children = document.getElementsByClassName('flexbox-item flexbox-item-3');
+            }
+
+        var sendMessage = function(event)
+                {
+                    event.preventDefault();
+
+                    var data = new FormData(event.target);
+                    document.getElementById('message-input').value = '';
+                    axios.post('/Chat/SendMessage',data)
+                    .then(res=>{
+                        console.log("Message Sent!")
+
+                    })
+                    .catch(err=>{
+                        console.log("Failed to send message")
+
+                    })
+                   }
+
+
+    </script>
+
+}
 
