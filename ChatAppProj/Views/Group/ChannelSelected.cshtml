@@ -11,11 +11,11 @@
 
         @foreach (var channel in Model.Channels)
         {
-            <div class="channelText">
-                <form asp-action="JoinChannel" asp-controller="Channel" asp-route-channelId="@channel.Id">
-                    <button type="submit"><span>@channel.Name</span></button>
-                </form>
-            </div>
+                <div class="channelText">
+                    <form asp-action="JoinChannel" asp-controller="Channel" asp-route-channelId="@channel.Id">
+                        <button type="submit"><span>@channel.Name</span></button>
+                    </form>
+                </div>
         }
 
     </div>
@@ -57,7 +57,10 @@
     <div class="flexbox-item flexbox-item-3">
         <!--Users in channel-->
         <div class="title">
-            <span>Online</span>
+            <span>Live</span>
+        </div>
+        <div class="title">
+            <span>Offline</span>
         </div>
 
 
@@ -77,40 +80,48 @@
         var apiKey = "&api_key=JAyUkMRhLZ0mPD6luVhc0AP1EE4zxIbk"
         var query = "&q=rainbow";
         var searchResultsGif;
+        var url;
 
         function setup() {
             noCanvas();
-            var url = api + apiKey + query;
+            url = api + apiKey + query;
             loadJSON(url, gotData);
         }
         function gotData(data) {
+            debugger;
             searchResultsGif = data;
             console.log(data);
+          
           
         }
 
          // jquery -  click on gif event
         $(function () {
             $('#UseGifs').on('click', function () {
-    
-            var messagesNode = document.getElementById("messageDiv");
-                messagesNode.innerHTML = '';
 
-                ShowTopTenGifs();
+                clearMessagesDiv();
+            
+                ShowGifs();
  
             });
 
         });
-        var ShowTopTenGifs = function ()
+        var clearMessagesDiv = function ()
+        {
+            var messagesNode = document.getElementById("messageDiv");
+                messagesNode.innerHTML = '';
+        }
+        var ShowGifs = function ()
         {
           
             var i = 0;
-            for (i; i < 15;i++)
+            for (i; i < 10;i++)
             {
+
                 var url = searchResultsGif.data[i].images.original.url;
                 var image = document.createElement("img");
-                image.width = 250;
-                image.height = 250;
+                image.width = 150;
+                image.height = 150;
                 image.src = url;
 
                 var messagesNode = document.getElementById("messageDiv");
@@ -120,7 +131,7 @@
 
             hideChatInputElements();
 
-            addSearchInput();
+            DisplaySearchInput();
 
 
         }
@@ -140,39 +151,76 @@
             filelLabel.style.display = "none";
 
 
-            // <input type="text" name="message" id="message-input" autofocus="">
-
-            // <form >
-            //        <button type="submit"><span>channel.Name</span></button>
-            // </form>
-
-        
 
         }
    
 
         // add search input
-         var addSearchInput = function ()
+         var DisplaySearchInput = function ()
         {
-             
-            var searchGifInputElement = document.createElement("input");
-            searchGifInputElement.name = "gif";
-             searchGifInputElement.id = "gifInputString";
-             searchGifInputElement.innerText = "rainbow";
+           
+             var middleContainer = document.getElementsByClassName("flexbox-item flexbox-item-2")[0];
 
+             //document.getElementById("inputsendmessage").appendChild(searchGifInputElement);
+
+             var chatinput = document.createElement("input");
+             chatinput.id = "gifInputString";
+             chatinput.innerHTML = "Rainbows";
+
+             var button = document.createElement("button");
+             button.id = "GiphyButton";
+             button.innerText = "Giphy";
              
 
-             // setup()
-             searchGifInputElement.onclick = function (element)
+             var newForm = document.createElement("div");
+             newForm.classList.add("chat-input");
+             newForm.appendChild(chatinput);
+             newForm.appendChild(button);
+
+             var oldForm = document.getElementsByClassName("chat-input")[0];
+             middleContainer.replaceChild(newForm, oldForm);
+
+             var button = document.getElementById("GiphyButton");
+             button.onclick = function ()
              {
+                 var element = document.getElementById("gifInputString");
+               
+                 console.log("Looking up Gifs for entered keyword : "+element.value);
+                 query = "&q=" + element.value;
+                 searchResultsGif = "";
+                 clearMessagesDiv();
+                 updateGifs();
+
                  
-                 var searchString = element.value;
-                 //updateQueryAndData(this.);
              }
 
+             console.log("show gif input - succes");
+             
 
-             document.getElementById("inputsendmessage").appendChild(searchGifInputElement);
-             var button = document.createElement("button")
+        }
+        var updateGifs = function()
+        {
+        
+            debugger;
+            url = api + apiKey + query;
+            loadJSON(url, gotData);
+          
+            var test = searchResultsGif;
+            console.log("setup is complete");
+
+             var i = 0;
+            for (i; i < 10;i++)
+            {
+                var url = searchResultsGif.data[i].images.original.url;
+                var image = document.createElement("img");
+                image.width = 150;
+                image.height = 150;
+                image.src = url;
+
+                var messagesNode = document.getElementById("messageDiv");
+                messagesNode.appendChild(image);
+
+            }
 
 
         }
@@ -187,31 +235,27 @@
         }
 
 
-        // grab username
-
+            // grab username
             var isOwner = new Boolean(false);
             var username = "@Html.Raw(Model.Profile.UserName)";
             var string1 = "@Model.OwnerId";
             var string2 = "@Model.Profile.Id";
             var result = string1.localeCompare(string2);
 
-        if (result==0)
+            if (result==0)
         {
            isOwner = true;
         }
+            // make connection
+             var _connectionId = '';
+             var connection = new signalR.HubConnectionBuilder()
+                     .withUrl("/chatHub")
+                    .build();
+                connection.serverTimeoutInMilliseconds = 100000; // 100 second
 
-
-        // make connection
-        var _connectionId = '';
-        var connection = new signalR.HubConnectionBuilder()
-             .withUrl("/chatHub")
-             .build();
-        connection.serverTimeoutInMilliseconds = 100000; // 100 second
-
-
-        // start
-        connection.start()
-           .then(function(){
+            // start
+            connection.start()
+            .then(function(){
              connection.invoke('getConnectionId')
                .then(function(connectionId){
                   _connectionId = connectionId
@@ -221,9 +265,8 @@
                 .catch(function(err){
                     console.log(err)
                 });
-
-        // enable input for chat
-        function ToggleInput() {
+            // enable input for chat
+            function ToggleInput() {
             var x = document.getElementById("inputsendmessage");
             if (x.style.display === "none") {
                 x.style.display = "block";
@@ -231,7 +274,7 @@
                 x.style.display = "none";
             }
             }
-         // join channel
+            // join channel
             var joinChannel = function () {
             var url = '/Chat/JoinChannel/' + _connectionId + '/@Model.Id'
             axios.post(url, null)
@@ -243,8 +286,6 @@
                     console.log("Failed to join Channel!", err);
                 })
             }
-
-        // event - UserJoinedChannel
             connection.on("UserJoinedChannel", function (data) {
 
 
@@ -286,8 +327,7 @@
                     element[0].appendChild(divElement);
                     var children = document.getElementsByClassName('flexbox-item flexbox-item-3');
           });
-
-        connection.on("ReceiveMessage", function (data) {
+            connection.on("ReceiveMessage", function (data) {
 
             var message = document.createElement("div");
             message.classList.add('message');
@@ -308,7 +348,7 @@
 
             document.getElementById("messageDiv").append(message)
         });
-             connection.on("UserLeftChannel", function (data) {
+            connection.on("UserLeftChannel", function (data) {
 
             console.log('data', data);
 
@@ -343,6 +383,7 @@
 
 
             });
+
             var ClearUsersOnline = function () {
 
                 var element = document.getElementsByClassName('flexbox-item flexbox-item-3')[0];
@@ -375,8 +416,7 @@
              element[0].appendChild(divElement);
              var children = document.getElementsByClassName('flexbox-item flexbox-item-3');
             }
-
-        var sendMessage = function(event)
+            var sendMessage = function(event)
                 {
                     event.preventDefault();
 

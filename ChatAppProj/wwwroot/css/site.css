@@ -75,6 +75,12 @@ button .centered
     margin-top: 4%;
     background-color: cornflowerblue;
 }
+
+    .flexbox-item .title:nth-child(2) {
+        width: 100%;
+        margin-top: 4%;
+        background-color: darkmagenta;
+    }
 .user
 {
     width: 100%;
