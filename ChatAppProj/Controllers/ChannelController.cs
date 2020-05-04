@@ -44,7 +44,7 @@ namespace ChatApp.Controllers
             var profile = _chatService.GetAllProfiles().Where(x => x.Id == profileId).FirstOrDefault();
 
             var selectedChannel = _chatService.GetAllChannels()
-                  .FirstOrDefault(c => c.Id == channelId);
+                  .FirstOrDefault(c => c.Id == channelId); 
 
             var currentGroup = _chatService.GetAllGroups().FirstOrDefault(g => g.Channels.Contains(selectedChannel));
            
@@ -52,26 +52,12 @@ namespace ChatApp.Controllers
                   .Where(c => c.GroupId == currentGroup.Id);
 
             // if user is owner
+            
+            model.IsOwner = currentGroup.ProfileId == profileId;
 
             model.OwnerId = currentGroup.ProfileId;
-            
 
-            // if user hasnt joined yet
-            var userAlrdyJoined = _chatService.GetAllChannelProfiles().Where(c => c.ChannelId == channelId).Where(c => c.ProfileId == profile.Id).Any();
-            if (!userAlrdyJoined)
-            {
-                var newChannelProfile = new ChannelProfile()
-                {
-                    Profile = profile,
-                    ProfileId = profile.Id,
-                    Channel = selectedChannel,
-                    ChannelId = selectedChannel.Id
-                };
 
-                _chatService.InsertChannelProfile(newChannelProfile);
-                _chatService.SaveChanges();
-            }
-            
 
             foreach (var channel in channels)
             {

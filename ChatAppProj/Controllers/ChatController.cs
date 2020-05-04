@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.SignalR;
 using ChatApp.Hubs;
 using Microsoft.AspNetCore.Http;
+using ChatApp.Models.Chat;
 
 namespace ChatApp.Controllers
 {
@@ -78,6 +79,7 @@ namespace ChatApp.Controllers
             {
                 Text = " has joined.",
                 Name = profile.UserName,
+                ProfileId = profile.Id,
                 Timestamp = DateTime.Now.ToShortTimeString()
             });
 
@@ -87,23 +89,42 @@ namespace ChatApp.Controllers
             {
                 Chat = chat,
                 ChatId = chat.Id,
-                Profile = profile,
+                ProfileName = profile.UserName,
                 ProfileId = profile.Id,
-                TimeEntered = DateTime.Now
+                IsOnline = true
             };
+
             _chatService.InsertTimeRegistration(timeregistration);
             _chatService.SaveChanges();
 
-           var trs = _chatService.GetAllTimeRegistrations().Where(tr => tr.ChatId == chat.Id&&tr.TimeLeft==null);
-           var usersCurrentlyOnline = new List<string>();
-           foreach (var tr in trs)
-           {
-               var user = _chatService.GetAllProfiles().FirstOrDefault(p => p.Id == tr.ProfileId);
-               usersCurrentlyOnline.Add(user.UserName);
-           }
+             // ChatService.SetUsersOfflineAfter5Min();
+           var trs = _chatService.GetAllTimeRegistrations().Where(tr => tr.ChatId == chat.Id&&tr.IsOnline);
+           var usersCurrentlyOnline = trs.Select(tr=> new ProfileChatModel
+           { 
+               ProfileName = tr.ProfileName,
+               ProfileId = tr.ProfileId
+           });
+
+
+            var sortedUserList = new HashSet<ProfileChatModel>(new ProfileComparer());
+            
+            foreach (var user in usersCurrentlyOnline)
+            {
+                //if (profile.Id != user.ProfileId)
+                //{
+                    sortedUserList.Add(
+                    new ProfileChatModel()
+                    {
+                        ProfileName = user.ProfileName,
+                        ProfileId = user.ProfileId
+                    });
+                //}
+                
+                
+            }
            
             await _chat.Clients.Group(chat.Id.ToString()).
-            SendAsync("UpdateUsersOnline", usersCurrentlyOnline)
+            SendAsync("UpdateUsersOnline", sortedUserList)
             ;
 
 

@@ -6,6 +6,7 @@
     <!--Channels-->
     <div class="flexbox-item flexbox-item-1">
         <div class="title">
+            <img " />
             <span>@Model.Name</span>
         </div>
 
@@ -56,11 +57,11 @@
     </div>
     <div class="flexbox-item flexbox-item-3">
         <!--Users in channel-->
-        <div class="title">
-            <span>Live</span>
+        <div class="online">
+            <span id="onlineList">Online</span>
         </div>
-        <div class="title">
-            <span>Offline</span>
+        <div class="offline">
+            <span id="offlineList">Offline</span>
         </div>
 
 
@@ -69,75 +70,66 @@
 </div>
 @section scripts
     {
-
-
     <script>
         
 
+        let api = "https://api.giphy.com/v1/gifs/search?";
+        let apiKey = "&api_key=JAyUkMRhLZ0mPD6luVhc0AP1EE4zxIbk"
+        let query = "&q=rainbow";
+     
+        let url = api + apiKey + query;
+        let searchResultsGif;
 
-
-        var api = "https://api.giphy.com/v1/gifs/search?";
-        var apiKey = "&api_key=JAyUkMRhLZ0mPD6luVhc0AP1EE4zxIbk"
-        var query = "&q=rainbow";
-        var searchResultsGif;
-        var url;
-
-        function setup() {
-            noCanvas();
-            url = api + apiKey + query;
-            loadJSON(url, gotData);
-        }
-        function gotData(data) {
-            debugger;
-            searchResultsGif = data;
-            console.log(data);
-          
-          
-        }
 
          // jquery -  click on gif event
         $(function () {
             $('#UseGifs').on('click', function () {
-
+             
                 clearMessagesDiv();
-            
-                ShowGifs();
  
             });
-
         });
+
+        // clear messagesDiv
         var clearMessagesDiv = function ()
         {
+            console.log("Clear Messages Div");
             var messagesNode = document.getElementById("messageDiv");
                 messagesNode.innerHTML = '';
         }
-        var ShowGifs = function ()
-        {
-          
-            var i = 0;
-            for (i; i < 10;i++)
+        // display first 10 gifs
+        var ShowGifs = function () {
+           console.log("ShowGifs");
+            if (searchResultsGif != null && searchResultsGif !== undefined)
             {
+                var i = 0;
+                for (i; i < 10;i++)
+                {
+                    var url = searchResultsGif.data[i].images.original.url;
+                    var image = document.createElement("img");
+                    image.width = 150;
+                    image.height = 150;
+                    image.src = url;
 
-                var url = searchResultsGif.data[i].images.original.url;
-                var image = document.createElement("img");
-                image.width = 150;
-                image.height = 150;
-                image.src = url;
+                    var messagesNode = document.getElementById("messageDiv");
+                    messagesNode.appendChild(image);
 
-                var messagesNode = document.getElementById("messageDiv");
-                messagesNode.appendChild(image);
+                }
 
             }
+           
+            
 
             hideChatInputElements();
 
-            DisplaySearchInput();
+            displaySearchInput();
 
 
         }
          //hide chat input elements
         var hideChatInputElements = function ()
         {
+             console.log("hideChatInputElements");
             var chatinput = document.getElementById("message-input");
             chatinput.style.display = "none";
 
@@ -153,19 +145,18 @@
 
 
         }
-   
-
         // add search input
-         var DisplaySearchInput = function ()
-        {
-           
+        var displaySearchInput = function ()
+         {
+
+              console.log("displaySearchInput");
              var middleContainer = document.getElementsByClassName("flexbox-item flexbox-item-2")[0];
 
              //document.getElementById("inputsendmessage").appendChild(searchGifInputElement);
 
              var chatinput = document.createElement("input");
              chatinput.id = "gifInputString";
-             chatinput.innerHTML = "Rainbows";
+           
 
              var button = document.createElement("button");
              button.id = "GiphyButton";
@@ -184,12 +175,26 @@
              button.onclick = function ()
              {
                  var element = document.getElementById("gifInputString");
-               
+                
                  console.log("Looking up Gifs for entered keyword : "+element.value);
                  query = "&q=" + element.value;
-                 searchResultsGif = "";
-                 clearMessagesDiv();
-                 updateGifs();
+                 url = api + apiKey + query;
+               
+                 console.log("fetched url: " + url);
+               fetch(url)
+                  .then(response => response.json())
+                  .then(content => {
+                   
+                      console.log(content.data);
+                      console.log("META", content.data);
+
+                      updateGifs(content.data);
+                    
+                     element.value = "";
+                  })
+                  .catch(err => {
+                    console.error(err);
+                  });
 
                  
              }
@@ -198,20 +203,17 @@
              
 
         }
-        var updateGifs = function()
+
+        var updateGifs = function(data)
         {
-        
-            debugger;
-            url = api + apiKey + query;
-            loadJSON(url, gotData);
-          
-            var test = searchResultsGif;
-            console.log("setup is complete");
+            
+            console.log("updateGifs");
 
              var i = 0;
             for (i; i < 10;i++)
             {
-                var url = searchResultsGif.data[i].images.original.url;
+                
+                var url = data[i].images.original.url;
                 var image = document.createElement("img");
                 image.width = 150;
                 image.height = 150;
@@ -219,10 +221,7 @@
 
                 var messagesNode = document.getElementById("messageDiv");
                 messagesNode.appendChild(image);
-
             }
-
-
         }
 
 
@@ -236,16 +235,11 @@
 
 
             // grab username
-            var isOwner = new Boolean(false);
+            var isOwner = "@Html.Raw(Model.IsOwner)";
+            console.log('isOwner var', isOwner);
             var username = "@Html.Raw(Model.Profile.UserName)";
-            var string1 = "@Model.OwnerId";
-            var string2 = "@Model.Profile.Id";
-            var result = string1.localeCompare(string2);
+      
 
-            if (result==0)
-        {
-           isOwner = true;
-        }
             // make connection
              var _connectionId = '';
              var connection = new signalR.HubConnectionBuilder()
@@ -265,6 +259,7 @@
                 .catch(function(err){
                     console.log(err)
                 });
+
             // enable input for chat
             function ToggleInput() {
             var x = document.getElementById("inputsendmessage");
@@ -273,7 +268,8 @@
             } else {
                 x.style.display = "none";
             }
-            }
+        }
+
             // join channel
             var joinChannel = function () {
             var url = '/Chat/JoinChannel/' + _connectionId + '/@Model.Id'
@@ -285,50 +281,39 @@
                 .catch(err => {
                     console.log("Failed to join Channel!", err);
                 })
-            }
-            connection.on("UserJoinedChannel", function (data) {
+        }
 
-
-        // event // show msg in chat
+            // UserJoinedChannel event
+        connection.on("UserJoinedChannel", function (data)
+        {
+             console.log("UserJoinedChannel");
+            //msg in chat
             var message = document.createElement("div");
             message.classList.add('message');
-
             var header = document.createElement("header");
             header.appendChild(document.createTextNode(data.name));
-
+     
             var p = document.createElement("p");
             p.appendChild(document.createTextNode(data.text));
 
             var small = document.createElement("small");
             var text = data.timestamp;
-            small.appendChild(document.createTextNode(text));
+            small.appendChild(document.createTextNode(text)); 
 
             message.appendChild(header);
             message.appendChild(p);
             message.appendChild(small);
 
-              document.getElementById("messageDiv").append(message)
+             document.getElementById("messageDiv").append(message)
 
-         // event // display user right column
-            var username = data.name;
-            var element = document.getElementsByClassName('flexbox-item flexbox-item-3');
-            var divElement = document.createElement("div");
-            var spanElement = document.createElement("span");
+      
 
-        // if user is owner
+            });
 
-             spanElement.innerText = username;
-             if (result==0)
-                {
-                  spanElement.innerText+=" (owner) ";
-                }
-                    divElement.appendChild(spanElement);
-                    divElement.classList.add("user");
-                    element[0].appendChild(divElement);
-                    var children = document.getElementsByClassName('flexbox-item flexbox-item-3');
-          });
-            connection.on("ReceiveMessage", function (data) {
+            //
+        connection.on("ReceiveMessage", function (data) {
 
+                console.log("ReceiveMessage");
             var message = document.createElement("div");
             message.classList.add('message');
 
@@ -347,11 +332,15 @@
             message.appendChild(small);
 
             document.getElementById("messageDiv").append(message)
-        });
-            connection.on("UserLeftChannel", function (data) {
+            });
+            //
+        connection.on("UserLeftChannel", function (data) {
 
+           console.log("UserLeftChannel");
+            // log data
             console.log('data', data);
 
+            // create user left message 
 
             var message = document.createElement("div");
             message.classList.add('message');
@@ -359,8 +348,8 @@
             var header = document.createElement("header");
             header.appendChild(document.createTextNode("server"));
 
-            var p = document.createElement("p");
-                 p.appendChild(document.createTextNode(data + ' went offline. '));
+                var p = document.createElement("p");
+                p.appendChild(document.createTextNode(data.profileName + ' went offline. '));
 
 
 
@@ -368,56 +357,65 @@
             message.appendChild(p);
 
 
-            document.getElementById("messageDiv").append(message)
+
+                console.log(data.profileId);
+            // remove from online list and put into offline   
+                document.getElementById(data.profileId).remove();
+                console.log("remove from online list");
+
+            var ele = document.getElementById("onlineList");
+            ele.appendChild(divElement);
+  
+
+              document.getElementById("messageDiv").append(message)
+                var element = document.getElementsByClassName('offline');
+
 
 
 
             });
-            connection.on("UpdateUsersOnline", function (data) {
-
-
-                console.log('data', data);
-                ClearUsersOnline();
-                data.forEach(element => addUser(element));
-
-
-
+            //
+        connection.on("UpdateUsersOnline", function (data) {
+            console.log("UpdateUsersOnline");
+            
+            document.getElementsByClassName("user")
+                data.forEach(element => addProfile(element));
             });
+            //
 
-            var ClearUsersOnline = function () {
-
-                var element = document.getElementsByClassName('flexbox-item flexbox-item-3')[0];
-                element.innerHTML = '';
-                var div = document.createElement("div");
-                div.classList.add("title");
-                var span = document.createElement("span");
-                span.innerHTML = 'Users';
-                div.appendChild(span);
-                element.appendChild(div);
-
-
-            }
-            var addUser = function (data)
+            //
+            var addProfile = function (data)
             {
-            var string1 = "@Model.OwnerId";
-            var string2 = "@Model.Profile.Id";
-            var result = string1.localeCompare(string2);
-
-            var element = document.getElementsByClassName('flexbox-item flexbox-item-3');
-            var divElement = document.createElement("div");
-            var spanElement = document.createElement("span");
-            spanElement.innerText = data;
-            if (result==0){
-                    spanElement.innerText += " (owner) ";
-                }
-
-             divElement.appendChild(spanElement);
-             divElement.classList.add("user");
-             element[0].appendChild(divElement);
-             var children = document.getElementsByClassName('flexbox-item flexbox-item-3');
-            }
-            var sendMessage = function(event)
+                if ("@Model.ProfileId" != data.profileId)
                 {
+                    console.log("addProfile");
+                     
+                     console.log(data.profileId);
+                     console.log(data.profileName);
+                     var element = document.getElementsByClassName('flexbox-item flexbox-item-3');
+                     var divElement = document.createElement("div");
+                     var spanElement = document.createElement("span");
+                     spanElement.innerText = data.profileName;
+                     divElement.id = data.profileId;
+                     if("@Model.OwnerId"==data.profileId)
+                     {
+                         spanElement.innerText+=" (owner) ";
+                     }
+                      
+                      divElement.appendChild(spanElement);
+                      divElement.classList.add("user");
+                       var ele = document.getElementById("onlineList");
+                         ele.appendChild(divElement);
+                
+                }
+                
+
+            
+            }
+            //
+            var sendMessage = function(event)
+            {
+                console.log("sendMessage");
                     event.preventDefault();
 
                     var data = new FormData(event.target);

@@ -66,21 +66,30 @@ button .centered
 {
     position: relative;
 }
-.flexbox-item .title span {
+.flexbox-item .online span {
+    margin-left: 34%;
+}
+.flexbox-item .offline span {
     margin-left: 34%;
 }
 
-.flexbox-item .title {
+.flexbox-item .online {
     width: 100%;
     margin-top: 4%;
     background-color: cornflowerblue;
 }
-
-    .flexbox-item .title:nth-child(2) {
+.flexbox-item .offline {
+    width: 100%;
+    margin-top: 4%;
+    background-color: cornflowerblue;
+}
+/*
+   .flexbox-item .title:nth-child(2) {
         width: 100%;
         margin-top: 4%;
         background-color: darkmagenta;
     }
+*/
 .user
 {
     width: 100%;
