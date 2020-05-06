@@ -20,6 +20,7 @@ namespace ChatApp.Domain
         [ForeignKey("Chat")]
         public int ChatId { get; set; }
         public Chat Chat { get; set; }
+        public MessageType Type { get; set; }
 
     }
 }

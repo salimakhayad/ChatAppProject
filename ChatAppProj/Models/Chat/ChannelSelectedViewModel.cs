@@ -15,7 +15,7 @@ namespace ChatApp.Models.Group
         public bool IsOwner { get; set; }
         public string OwnerId { get; set; }
         public Domain.Profile Profile { get; set; }
-        // public byte[] Photo { get; set; }
+        public byte[] Photo { get; set; }
         public ChatApp.Domain.Channel SelectedChannel { get; set; }
         public virtual ICollection<Domain.Channel> Channels { get; set; }
         public ChatApp.Domain.Group Group { get; set; }

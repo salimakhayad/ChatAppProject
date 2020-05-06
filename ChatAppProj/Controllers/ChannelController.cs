@@ -51,8 +51,9 @@ namespace ChatApp.Controllers
             var channels = _chatService.GetAllChannels()
                   .Where(c => c.GroupId == currentGroup.Id);
 
+            model.Photo = currentGroup.Photo;
             // if user is owner
-            
+
             model.IsOwner = currentGroup.ProfileId == profileId;
 
             model.OwnerId = currentGroup.ProfileId;

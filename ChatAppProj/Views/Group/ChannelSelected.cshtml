@@ -6,8 +6,8 @@
     <!--Channels-->
     <div class="flexbox-item flexbox-item-1">
         <div class="title">
-            <img " />
-            <span>@Model.Name</span>
+            <img width="250" height="250" src="@String.Format("data:image/gif;base64,{0}", Convert.ToBase64String(@Model.Photo))" />
+            <span class="neon">@Model.Name</span>
         </div>
 
         @foreach (var channel in Model.Channels)
@@ -84,9 +84,15 @@
          // jquery -  click on gif event
         $(function () {
             $('#UseGifs').on('click', function () {
-             
+                console.log("inside click on gif event");
+                ShowGifs();
                 clearMessagesDiv();
- 
+                var fuElement = document.getElementById("file-upload");
+                if(fuElement!=null&&fuElement!=undefined)
+                {
+                    document.getElementById("file-upload").remove();
+                }
+                
             });
         });
 
@@ -99,7 +105,8 @@
         }
         // display first 10 gifs
         var ShowGifs = function () {
-           console.log("ShowGifs");
+            console.log("ShowGifs");
+            console.log(searchResultsGif);
             if (searchResultsGif != null && searchResultsGif !== undefined)
             {
                 var i = 0;
@@ -159,7 +166,7 @@
            
 
              var button = document.createElement("button");
-             button.id = "GiphyButton";
+             button.id = "giphyButton";
              button.innerText = "Giphy";
              
 
@@ -171,11 +178,10 @@
              var oldForm = document.getElementsByClassName("chat-input")[0];
              middleContainer.replaceChild(newForm, oldForm);
 
-             var button = document.getElementById("GiphyButton");
+             var button = document.getElementById("giphyButton");
              button.onclick = function ()
              {
-                 var element = document.getElementById("gifInputString");
-                
+                 console.log(element);
                  console.log("Looking up Gifs for entered keyword : "+element.value);
                  query = "&q=" + element.value;
                  url = api + apiKey + query;
@@ -196,7 +202,7 @@
                     console.error(err);
                   });
 
-                 
+                  console.log("end of onclick event");
              }
 
              console.log("show gif input - succes");

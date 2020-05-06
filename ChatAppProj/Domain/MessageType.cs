@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 
 namespace ChatApp.Domain
 {
-     enum MessageType
+     public enum MessageType
     {
         Text,
         File,
+        Image,
         Gif
     }
 }

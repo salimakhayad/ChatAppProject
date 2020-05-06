@@ -49,7 +49,9 @@ namespace ChatApp.Controllers
                 ChatId = chatId,
                 Text = message?? " ",
                 ProfileName = User.Identity.Name,
-                Timestamp = DateTime.Now              
+                Timestamp = DateTime.Now,
+                Type = MessageType.Text
+  
             };
             _chatService.InsertMessage(Message);
             await _chatService.SaveChangesAsync();
@@ -150,7 +152,8 @@ namespace ChatApp.Controllers
                 ChatId = chatId,
                 Text = message,
                 ProfileName = User.Identity.Name,
-                Timestamp = DateTime.Now
+                Timestamp = DateTime.Now,
+                Type = MessageType.Text
             };
             _chatService.InsertMessage(Message);
             await _chatService.SaveChangesAsync();
