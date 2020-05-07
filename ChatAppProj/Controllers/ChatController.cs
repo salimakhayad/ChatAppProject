@@ -167,5 +167,35 @@ namespace ChatApp.Controllers
             });
             return Ok();
         }
+
+        [HttpPost("[action]")]
+        public async Task<ActionResult> SendGif(
+           int chatId,
+           string gifUrl
+           )
+        {
+            var chat = _chatService.GetAllChats().FirstOrDefault(c => c.Id == chatId);
+            var Message = new Message()
+            {
+                Chat = chat,
+                ChatId = chatId,
+                Text = gifUrl,
+                ProfileName = User.Identity.Name,
+                Timestamp = DateTime.Now,
+                Type = MessageType.Gif
+            };
+            _chatService.InsertMessage(Message);
+            await _chatService.SaveChangesAsync();
+
+            await _chat.Clients.Group(chatId.ToString())
+            .SendAsync("ReceiveMessage", new
+            {
+                Text = Message.Text,
+                Name = Message.ProfileName,
+                Timestamp = Message.Timestamp.ToShortTimeString()
+            });
+            return Ok();
+        }
     }
+}
 }

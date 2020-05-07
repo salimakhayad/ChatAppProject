@@ -26,11 +26,21 @@
 
             @foreach (var message in Model.SelectedChannel.Chat.Messages)
             {
-                <div class="message">
-                    <header>@message.ProfileName</header>
-                    <p>@message.Text</p>
-                    <small>@message.Timestamp.ToShortTimeString()</small>
-                </div>
+                
+            <div class="message">
+                <header>@message.ProfileName</header>
+                @if (message.Type == ChatApp.Domain.MessageType.Text)
+                {<p>@message.Text</p>}
+                else
+                @if (message.Type == ChatApp.Domain.MessageType.Gif || message.Type == ChatApp.Domain.MessageType.Image)
+                {<img src="@message.Text" />}
+                else
+                @if (message.Type == ChatApp.Domain.MessageType.File)
+                {<img src="@message.Text"/>}
+
+
+            <small>@message.Timestamp.ToShortTimeString()</small>
+            </div>
             }
         </div>
 
@@ -44,7 +54,7 @@
             <input id="file-upload" type="file" />
 
 
-            <input type="text" name="message" id="message-input" autofocus />
+            <input type="text" name="message" id="user-input" autofocus />
 
             <!--Gif-->
             <a id="UseGifs" class="gifIcon">
@@ -166,24 +176,14 @@
            
 
              var button = document.createElement("button");
-             button.id = "giphyButton";
+             button.id = "giphyButton#";
              button.innerText = "Giphy";
-             
-
-             var newForm = document.createElement("div");
-             newForm.classList.add("chat-input");
-             newForm.appendChild(chatinput);
-             newForm.appendChild(button);
-
-             var oldForm = document.getElementsByClassName("chat-input")[0];
-             middleContainer.replaceChild(newForm, oldForm);
-
-             var button = document.getElementById("giphyButton");
              button.onclick = function ()
              {
-                 console.log(element);
-                 console.log("Looking up Gifs for entered keyword : "+element.value);
-                 query = "&q=" + element.value;
+                 console.log(this);
+                 console.log("Looking up Gifs for entered keyword : "+chatinput.value);
+                 query = "&q=" + chatinput.value;
+                 console.log(query);
                  url = api + apiKey + query;
                
                  console.log("fetched url: " + url);
@@ -196,7 +196,7 @@
 
                       updateGifs(content.data);
                     
-                     element.value = "";
+                     this.value = "";
                   })
                   .catch(err => {
                     console.error(err);
@@ -204,6 +204,18 @@
 
                   console.log("end of onclick event");
              }
+             
+
+             var newForm = document.createElement("div");
+             newForm.classList.add("chat-input");
+            newForm.appendChild(chatinput);
+
+             newForm.appendChild(button);
+
+             var oldForm = document.getElementsByClassName("chat-input")[0];
+             middleContainer.replaceChild(newForm, oldForm);
+
+             
 
              console.log("show gif input - succes");
              
@@ -214,19 +226,36 @@
         {
             
             console.log("updateGifs");
-
+            console.log(data);
              var i = 0;
             for (i; i < 10;i++)
             {
-                
-                var url = data[i].images.original.url;
-                var image = document.createElement("img");
-                image.width = 150;
-                image.height = 150;
-                image.src = url;
+                if (data[i] != null && data[i] != undefined)
+                {
+                    var url = data[i].images.original.url;
+                    var image = document.createElement("img");
+                    image.width = 150;
+                    image.height = 150;
+                    image.src = url;
+                    image.id = "gif-input";
+                    image.onsubmit = sendMessage(event);
+                    image.value = url;
+                    image.onclick = function ()
+                    {
+                        console.log("Clicked on:" + url)
+                       
+                        /*
+                         
+                         
+                         */
+                    }
+                    var form = document.createElement("form");
+                    form.onsubmit = sendGif(event);
 
-                var messagesNode = document.getElementById("messageDiv");
-                messagesNode.appendChild(image);
+                    var messagesNode = document.getElementById("messageDiv");
+                    messagesNode.appendChild(image);
+                }
+                
             }
         }
 
@@ -315,7 +344,6 @@
       
 
             });
-
             //
         connection.on("ReceiveMessage", function (data) {
 
@@ -342,7 +370,7 @@
             //
         connection.on("UserLeftChannel", function (data) {
 
-           console.log("UserLeftChannel");
+        console.log("UserLeftChannel");
             // log data
             console.log('data', data);
 
@@ -425,7 +453,7 @@
                     event.preventDefault();
 
                     var data = new FormData(event.target);
-                    document.getElementById('message-input').value = '';
+                    document.getElementById('user-input').value = '';
                     axios.post('/Chat/SendMessage',data)
                     .then(res=>{
                         console.log("Message Sent!")
@@ -435,7 +463,25 @@
                         console.log("Failed to send message")
 
                     })
-                   }
+        }
+            var sendGif = function(event)
+            {
+                console.log("sendGif");
+                    event.preventDefault();
+
+                var data = new FormData(event.target);
+                    console.log(data);
+                    document.getElementById('gif-input').value = '';
+                    axios.post('/Chat/SendGif',data)
+                    .then(res=>{
+                        console.log("Gif Sent!")
+
+                    })
+                    .catch(err=>{
+                        console.log("Failed to send Gif")
+
+                    })
+            }
 
 
     </script>
