@@ -61,8 +61,6 @@ namespace ChatApp.Controllers
             return RedirectToAction("JoinChannel","Channel", new { channelId = channel.Id });
         }
         //http://localhost:5001/Chat/JoinChannel?channelId=1
-       
-
 
         [HttpPost("[action]/{connectionId}/{channelId}")]
         public async Task<IActionResult> JoinChannel(string connectionId, string channelId)
@@ -175,6 +173,7 @@ namespace ChatApp.Controllers
            )
         {
             var chat = _chatService.GetAllChats().FirstOrDefault(c => c.Id == chatId);
+            var channel = _chatService.GetAllChannels().FirstOrDefault(c => c.Chat.Id==chatId);
             var Message = new Message()
             {
                 Chat = chat,
@@ -188,14 +187,15 @@ namespace ChatApp.Controllers
             await _chatService.SaveChangesAsync();
 
             await _chat.Clients.Group(chatId.ToString())
-            .SendAsync("ReceiveMessage", new
+            .SendAsync("ReceiveGif", new
             {
-                Text = Message.Text,
+                GifUrl = Message.Text,
                 Name = Message.ProfileName,
                 Timestamp = Message.Timestamp.ToShortTimeString()
             });
-            return Ok();
+      
+            return RedirectToAction("JoinChannel","Channel", new { channelId = channel.Id });
         }
     }
 }
-}
+

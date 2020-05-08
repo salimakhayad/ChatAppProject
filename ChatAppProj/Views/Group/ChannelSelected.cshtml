@@ -33,7 +33,7 @@
                 {<p>@message.Text</p>}
                 else
                 @if (message.Type == ChatApp.Domain.MessageType.Gif || message.Type == ChatApp.Domain.MessageType.Image)
-                {<img src="@message.Text" />}
+                {<img src="@message.Text" width="150" height="150"/>}
                 else
                 @if (message.Type == ChatApp.Domain.MessageType.File)
                 {<img src="@message.Text"/>}
@@ -147,17 +147,22 @@
         var hideChatInputElements = function ()
         {
              console.log("hideChatInputElements");
-            var chatinput = document.getElementById("message-input");
+            var chatinput = document.getElementById("user-input");
             chatinput.style.display = "none";
 
+            console.log("hide message-input complete");
               var gificon = document.getElementById("gifImg");
             gificon.style.display = "none";
 
+            console.log("hide gificon complete");
             var fileIcon = document.getElementById("file-upload");
             fileIcon.style.display = "none";
 
+            console.log("hide fileIcon complete");
             var filelLabel = document.getElementsByClassName("custom-file-upload")[0];
             filelLabel.style.display = "none";
+
+             console.log("hide filelLabel complete");
 
 
 
@@ -224,7 +229,7 @@
 
         var updateGifs = function(data)
         {
-            
+         
             console.log("updateGifs");
             console.log(data);
              var i = 0;
@@ -238,42 +243,104 @@
                     image.height = 150;
                     image.src = url;
                     image.id = "gif-input";
-                    image.onsubmit = sendMessage(event);
+                    // image.onsubmit = sendGif(event);
                     image.value = url;
-                    image.onclick = function ()
-                    {
-                        console.log("Clicked on:" + url)
-                       
-                        /*
-                         
-                         
-                         */
-                    }
+                   //image.onclick = function () {
+                   //    console.log("Clicked on:" + url); 
+                   //
+                   //    var data = {
+                   //        chatId : "@Model.SelectedChannel.Chat.Id",
+                   //        gifUrl : url
+                   //    };
+                   //
+                   //    sendGif(data);
+                   //
+                   //};
                     var form = document.createElement("form");
-                    form.onsubmit = sendGif(event);
+                    
+                    var hiddenInputChatId = document.createElement("input");
+                    hiddenInputChatId.type = "hidden";
+                    hiddenInputChatId.class = "gif-input";
+                    hiddenInputChatId.name = "chatId";
+                    hiddenInputChatId.value = "@Model.SelectedChannel.Chat.Id";
+                    
+                    var inputGif = document.createElement("input");
+                    inputGif.type = "hidden";
+                    inputGif.class = "gif-input";
+                    inputGif.name = "gifUrl";
+                    inputGif.value = url;
+                    
+                    
+                    form.appendChild(hiddenInputChatId);
+                    form.appendChild(inputGif);
+                    form.appendChild(image);
 
-                    var messagesNode = document.getElementById("messageDiv");
-                    messagesNode.appendChild(image);
+                    form.addEventListener("click", function (e) {
+                        console.log("clicked on gif");
+                        var data = {
+                            chatId : hiddenInputChatId.value,
+                            gifUrl : url
+                        }
+                        sendGif(data);
+
+                        
+                    });
+                    
+                    
+
+
+                    // <button name="action" value="blue"><img src="blue.png" alt="blue"></button>
+    
+                        //form.onsubmit = sendGif(event);
+                        
+    
+                        var messagesNode = document.getElementById("messageDiv");
+                        messagesNode.appendChild(form);
+                    }
+                    
                 }
-                
             }
-        }
-
-
-        // scroll msg div to the bottom
-        window.onload=function () {
-        document.getElementById("inputsendmessage").style="block";
-        var element = document.getElementById('messageDiv');
-            element.scrollTop = element.scrollHeight;
-
-        }
+    
+    
+            // scroll msg div to the bottom
+        
 
 
             // grab username
             var isOwner = "@Html.Raw(Model.IsOwner)";
             console.log('isOwner var', isOwner);
-            var username = "@Html.Raw(Model.Profile.UserName)";
-      
+        var username = "@Html.Raw(Model.Profile.UserName)";
+        var profileIdentifier = "@Html.Raw(Model.Profile.Id)";
+
+            // onload
+             window.onload = function () {
+                 // make input element visible
+             document.getElementById("inputsendmessage").style="block";
+             var element = document.getElementById('messageDiv');
+                 element.scrollTop = element.scrollHeight;
+                 // addprofile
+                
+                     var divElement = document.createElement("div");
+                     var spanElement = document.createElement("span");
+                     spanElement.innerText = username;
+                     divElement.id = profileIdentifier;
+                     if("@Model.OwnerId"==profileIdentifier)
+                     {
+                         spanElement.innerText+=" (owner) ";
+                     }
+                      
+                      divElement.appendChild(spanElement);
+                      divElement.classList.add("user");
+                       var ele = document.getElementById("onlineList");
+                         ele.appendChild(divElement);
+                 
+
+                 $("img").click(function(){
+                     console.log(this);
+                      });
+
+             }
+
 
             // make connection
              var _connectionId = '';
@@ -325,6 +392,7 @@
             //msg in chat
             var message = document.createElement("div");
             message.classList.add('message');
+
             var header = document.createElement("header");
             header.appendChild(document.createTextNode(data.name));
      
@@ -366,7 +434,32 @@
             message.appendChild(small);
 
             document.getElementById("messageDiv").append(message)
-            });
+        });
+        connection.on("ReceiveGif"), function (data)
+        {
+            console.log("Gif Received!");
+            var message = document.createElement("div");
+            message.classList.add('message');
+
+            var header = document.createElement("header");
+            header.appendChild(document.createTextNode(data.name));
+
+            var img = document.createElement("img");
+            img.src = data.GifUrl;
+            img.width = 150;
+            img.height = 150;
+
+
+            var small = document.createElement("small");
+            var text = data.timestamp;
+            small.appendChild(document.createTextNode(text));
+
+            message.appendChild(header);
+            message.appendChild(img);
+            message.appendChild(small);
+
+            document.getElementById("messageDiv").append(message)
+        }
             //
         connection.on("UserLeftChannel", function (data) {
 
@@ -450,6 +543,7 @@
             var sendMessage = function(event)
             {
                 console.log("sendMessage");
+              console.log(event);
                     event.preventDefault();
 
                     var data = new FormData(event.target);
@@ -464,23 +558,34 @@
 
                     })
         }
-            var sendGif = function(event)
-            {
-                console.log("sendGif");
-                    event.preventDefault();
+        var sendGif = function (data) {
+            console.log("sendGif");
+            debugger;
 
-                var data = new FormData(event.target);
-                    console.log(data);
-                    document.getElementById('gif-input').value = '';
-                    axios.post('/Chat/SendGif',data)
-                    .then(res=>{
-                        console.log("Gif Sent!")
 
-                    })
-                    .catch(err=>{
-                        console.log("Failed to send Gif")
+            console.log(data);
+            var formData = new FormData();
+            formData.set('chatId', data.chatId);
+            formData.set('gifUrl', data.gifUrl);
 
-                    })
+            axios({
+                method: 'post',
+                url: '/Chat/SendGif',
+                data: formData,
+                headers: { 'Content-type': 'multipart/form-data' }
+            }).then(res => {
+                console.log("Gif Sent!")
+            }).catch(err => { console.log(err) })
+               
+
+              // a    console.log("Failed to send Gif")xios.post('/Chat/SendGif', data)
+              // .then(res=>{
+              //  })   console.log("Gif Sent!")
+              // })
+              // .catch(err=>{
+              //     console.log("Failed to send Gif")
+              // 
+              // })
             }
 
 
