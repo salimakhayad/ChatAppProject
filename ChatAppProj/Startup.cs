@@ -37,7 +37,7 @@ namespace ChatApp
 
             services.AddControllersWithViews();
             services.AddRazorPages();
-
+            
             services.AddDbContextPool<ChatDbContext>(options =>
                options.UseSqlServer(_configuration.GetConnectionString("ChatDb")));
 
@@ -61,6 +61,11 @@ namespace ChatApp
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddMvc((opt) => opt.EnableEndpointRouting = false);
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            services.AddMvc().AddJsonOptions(o =>
+            {
+                o.JsonSerializerOptions.PropertyNamingPolicy = null;
+                o.JsonSerializerOptions.DictionaryKeyPolicy = null;
+            });
 
             services.AddSignalR();
         }

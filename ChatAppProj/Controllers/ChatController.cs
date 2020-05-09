@@ -193,7 +193,6 @@ namespace ChatApp.Controllers
                 Name = Message.ProfileName,
                 Timestamp = Message.Timestamp.ToShortTimeString()
             });
-      
             return RedirectToAction("JoinChannel","Channel", new { channelId = channel.Id });
         }
     }

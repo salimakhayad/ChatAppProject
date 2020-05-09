@@ -1,6 +1,7 @@
 ﻿@model ChannelSelectedViewModel
 @using System.Security.Claims;
 @using ChatApp.Models.Group;
+@using ChatApp.Domain;
 
 <div class="flexbox-container">
     <!--Channels-->
@@ -12,38 +13,39 @@
 
         @foreach (var channel in Model.Channels)
         {
-                <div class="channelText">
-                    <form asp-action="JoinChannel" asp-controller="Channel" asp-route-channelId="@channel.Id">
-                        <button type="submit"><span>@channel.Name</span></button>
-                    </form>
-                </div>
+            <div class="channelText">
+                <form asp-action="JoinChannel" asp-controller="Channel" asp-route-channelId="@channel.Id">
+                    <button type="submit"><span>@channel.Name</span></button>
+                </form>
+            </div>
         }
 
     </div>
+    <!--Messages-->
     <div class="flexbox-item flexbox-item-2">
-        <!--Messages-->
+
         <div id="messageDiv" class="messages">
 
             @foreach (var message in Model.SelectedChannel.Chat.Messages)
             {
-                
-            <div class="message">
-                <header>@message.ProfileName</header>
-                @if (message.Type == ChatApp.Domain.MessageType.Text)
-                {<p>@message.Text</p>}
+
+                <div class="message">
+                    <header>@message.ProfileName</header>
+                    @if (message.Type == MessageType.Text)
+                    {<p>@message.Text</p>}
                 else
-                @if (message.Type == ChatApp.Domain.MessageType.Gif || message.Type == ChatApp.Domain.MessageType.Image)
-                {<img src="@message.Text" width="150" height="150"/>}
-                else
-                @if (message.Type == ChatApp.Domain.MessageType.File)
-                {<img src="@message.Text"/>}
+                @if (message.Type == MessageType.Gif || message.Type == MessageType.Image)
+               {<img src="@message.Text" width="150" height="150" />}
+            else
+            @if (message.Type == MessageType.File)
+           {<img src="@message.Text" />}
 
 
             <small>@message.Timestamp.ToShortTimeString()</small>
-            </div>
-            }
         </div>
-
+    }
+        </div>
+        <!--user input-->
         <form id="inputsendmessage" class="chat-input" onsubmit="sendMessage(event)" asp-controller="Chat" asp-action="CreateMessage">
             <input type="hidden" name="chatId" value="@Model.SelectedChannel.Chat.Id" />
             <!--File upload-->
@@ -53,7 +55,7 @@
             </label>
             <input id="file-upload" type="file" />
 
-
+            <!--Tekst-->
             <input type="text" name="message" id="user-input" autofocus />
 
             <!--Gif-->
@@ -65,8 +67,8 @@
 
         </form>
     </div>
+    <!--Users in channel-->
     <div class="flexbox-item flexbox-item-3">
-        <!--Users in channel-->
         <div class="online">
             <span id="onlineList">Online</span>
         </div>
@@ -81,269 +83,35 @@
 @section scripts
     {
     <script>
-        
 
-        let api = "https://api.giphy.com/v1/gifs/search?";
-        let apiKey = "&api_key=JAyUkMRhLZ0mPD6luVhc0AP1EE4zxIbk"
-        let query = "&q=rainbow";
-     
-        let url = api + apiKey + query;
-        let searchResultsGif;
+       //#region props
+          var chatInputForm;
+       //#endregion
+
+       // #region user
 
 
-         // jquery -  click on gif event
-        $(function () {
-            $('#UseGifs').on('click', function () {
-                console.log("inside click on gif event");
-                ShowGifs();
-                clearMessagesDiv();
-                var fuElement = document.getElementById("file-upload");
-                if(fuElement!=null&&fuElement!=undefined)
-                {
-                    document.getElementById("file-upload").remove();
-                }
-                
-            });
-        });
-
-        // clear messagesDiv
-        var clearMessagesDiv = function ()
-        {
-            console.log("Clear Messages Div");
-            var messagesNode = document.getElementById("messageDiv");
-                messagesNode.innerHTML = '';
-        }
-        // display first 10 gifs
-        var ShowGifs = function () {
-            console.log("ShowGifs");
-            console.log(searchResultsGif);
-            if (searchResultsGif != null && searchResultsGif !== undefined)
-            {
-                var i = 0;
-                for (i; i < 10;i++)
-                {
-                    var url = searchResultsGif.data[i].images.original.url;
-                    var image = document.createElement("img");
-                    image.width = 150;
-                    image.height = 150;
-                    image.src = url;
-
-                    var messagesNode = document.getElementById("messageDiv");
-                    messagesNode.appendChild(image);
-
-                }
-
-            }
-           
-            
-
-            hideChatInputElements();
-
-            displaySearchInput();
-
-
-        }
-         //hide chat input elements
-        var hideChatInputElements = function ()
-        {
-             console.log("hideChatInputElements");
-            var chatinput = document.getElementById("user-input");
-            chatinput.style.display = "none";
-
-            console.log("hide message-input complete");
-              var gificon = document.getElementById("gifImg");
-            gificon.style.display = "none";
-
-            console.log("hide gificon complete");
-            var fileIcon = document.getElementById("file-upload");
-            fileIcon.style.display = "none";
-
-            console.log("hide fileIcon complete");
-            var filelLabel = document.getElementsByClassName("custom-file-upload")[0];
-            filelLabel.style.display = "none";
-
-             console.log("hide filelLabel complete");
-
-
-
-        }
-        // add search input
-        var displaySearchInput = function ()
-         {
-
-              console.log("displaySearchInput");
-             var middleContainer = document.getElementsByClassName("flexbox-item flexbox-item-2")[0];
-
-             //document.getElementById("inputsendmessage").appendChild(searchGifInputElement);
-
-             var chatinput = document.createElement("input");
-             chatinput.id = "gifInputString";
-           
-
-             var button = document.createElement("button");
-             button.id = "giphyButton#";
-             button.innerText = "Giphy";
-             button.onclick = function ()
-             {
-                 console.log(this);
-                 console.log("Looking up Gifs for entered keyword : "+chatinput.value);
-                 query = "&q=" + chatinput.value;
-                 console.log(query);
-                 url = api + apiKey + query;
-               
-                 console.log("fetched url: " + url);
-               fetch(url)
-                  .then(response => response.json())
-                  .then(content => {
-                   
-                      console.log(content.data);
-                      console.log("META", content.data);
-
-                      updateGifs(content.data);
-                    
-                     this.value = "";
-                  })
-                  .catch(err => {
-                    console.error(err);
-                  });
-
-                  console.log("end of onclick event");
-             }
-             
-
-             var newForm = document.createElement("div");
-             newForm.classList.add("chat-input");
-            newForm.appendChild(chatinput);
-
-             newForm.appendChild(button);
-
-             var oldForm = document.getElementsByClassName("chat-input")[0];
-             middleContainer.replaceChild(newForm, oldForm);
-
-             
-
-             console.log("show gif input - succes");
-             
-
-        }
-
-        var updateGifs = function(data)
-        {
-         
-            console.log("updateGifs");
-            console.log(data);
-             var i = 0;
-            for (i; i < 10;i++)
-            {
-                if (data[i] != null && data[i] != undefined)
-                {
-                    var url = data[i].images.original.url;
-                    var image = document.createElement("img");
-                    image.width = 150;
-                    image.height = 150;
-                    image.src = url;
-                    image.id = "gif-input";
-                    // image.onsubmit = sendGif(event);
-                    image.value = url;
-                   //image.onclick = function () {
-                   //    console.log("Clicked on:" + url); 
-                   //
-                   //    var data = {
-                   //        chatId : "@Model.SelectedChannel.Chat.Id",
-                   //        gifUrl : url
-                   //    };
-                   //
-                   //    sendGif(data);
-                   //
-                   //};
-                    var form = document.createElement("form");
-                    
-                    var hiddenInputChatId = document.createElement("input");
-                    hiddenInputChatId.type = "hidden";
-                    hiddenInputChatId.class = "gif-input";
-                    hiddenInputChatId.name = "chatId";
-                    hiddenInputChatId.value = "@Model.SelectedChannel.Chat.Id";
-                    
-                    var inputGif = document.createElement("input");
-                    inputGif.type = "hidden";
-                    inputGif.class = "gif-input";
-                    inputGif.name = "gifUrl";
-                    inputGif.value = url;
-                    
-                    
-                    form.appendChild(hiddenInputChatId);
-                    form.appendChild(inputGif);
-                    form.appendChild(image);
-
-                    form.addEventListener("click", function (e) {
-                        console.log("clicked on gif");
-                        var data = {
-                            chatId : hiddenInputChatId.value,
-                            gifUrl : url
-                        }
-                        sendGif(data);
-
-                        
-                    });
-                    
-                    
-
-
-                    // <button name="action" value="blue"><img src="blue.png" alt="blue"></button>
-    
-                        //form.onsubmit = sendGif(event);
-                        
-    
-                        var messagesNode = document.getElementById("messageDiv");
-                        messagesNode.appendChild(form);
-                    }
-                    
-                }
-            }
-    
-    
-            // scroll msg div to the bottom
-        
-
-
-            // grab username
-            var isOwner = "@Html.Raw(Model.IsOwner)";
-            console.log('isOwner var', isOwner);
         var username = "@Html.Raw(Model.Profile.UserName)";
         var profileIdentifier = "@Html.Raw(Model.Profile.Id)";
+        // #endregion
 
-            // onload
-             window.onload = function () {
-                 // make input element visible
+       // #region onload
+        window.onload = function () {
+             // make input element visible
              document.getElementById("inputsendmessage").style="block";
-             var element = document.getElementById('messageDiv');
-                 element.scrollTop = element.scrollHeight;
-                 // addprofile
-                
-                     var divElement = document.createElement("div");
-                     var spanElement = document.createElement("span");
-                     spanElement.innerText = username;
-                     divElement.id = profileIdentifier;
-                     if("@Model.OwnerId"==profileIdentifier)
-                     {
-                         spanElement.innerText+=" (owner) ";
-                     }
-                      
-                      divElement.appendChild(spanElement);
-                      divElement.classList.add("user");
-                       var ele = document.getElementById("onlineList");
-                         ele.appendChild(divElement);
-                 
+             var element = document.getElementById("messageDiv");
+            element.scrollTop = element.scrollHeight;
 
-                 $("img").click(function(){
-                     console.log(this);
-                      });
+
+            displayCurrentUserOnline();
+
 
              }
+         //#endregion
 
+       //#region connection
 
-            // make connection
-             var _connectionId = '';
+             var _connectionId = "";
              var connection = new signalR.HubConnectionBuilder()
                      .withUrl("/chatHub")
                     .build();
@@ -352,7 +120,7 @@
             // start
             connection.start()
             .then(function(){
-             connection.invoke('getConnectionId')
+             connection.invoke("getConnectionId")
                .then(function(connectionId){
                   _connectionId = connectionId
                   joinChannel();
@@ -361,63 +129,37 @@
                 .catch(function(err){
                     console.log(err)
                 });
+        //#endregion
 
-            // enable input for chat
-            function ToggleInput() {
-            var x = document.getElementById("inputsendmessage");
-            if (x.style.display === "none") {
-                x.style.display = "block";
-            } else {
-                x.style.display = "none";
-            }
-        }
+       //#region giphy api call
 
-            // join channel
-            var joinChannel = function () {
-            var url = '/Chat/JoinChannel/' + _connectionId + '/@Model.Id'
-            axios.post(url, null)
-                .then(res => {
-                    console.log("Channel Joined!", res);
+        let api = "https://api.giphy.com/v1/gifs/search?";
+        let apiKey = "&api_key=JAyUkMRhLZ0mPD6luVhc0AP1EE4zxIbk"
+        let query = "&q=";
 
-                })
-                .catch(err => {
-                    console.log("Failed to join Channel!", err);
-                })
-        }
+        let searchResultsGif;
+        // #endregion
 
-            // UserJoinedChannel event
-        connection.on("UserJoinedChannel", function (data)
-        {
-             console.log("UserJoinedChannel");
-            //msg in chat
-            var message = document.createElement("div");
-            message.classList.add('message');
+       // #region jquery
+        $(function () {
+            $("#UseGifs").on("click", function () {
+                console.log("inside click on gif event");
+                displayGifInputElements();
+                clearMessagesDiv();
+                document.getElementById("file-upload").style.display = "none";
 
-            var header = document.createElement("header");
-            header.appendChild(document.createTextNode(data.name));
-     
-            var p = document.createElement("p");
-            p.appendChild(document.createTextNode(data.text));
-
-            var small = document.createElement("small");
-            var text = data.timestamp;
-            small.appendChild(document.createTextNode(text)); 
-
-            message.appendChild(header);
-            message.appendChild(p);
-            message.appendChild(small);
-
-             document.getElementById("messageDiv").append(message)
-
-      
 
             });
-            //
+        });
+        // #endregion
+
+       //#region Hub | connection.on
+
         connection.on("ReceiveMessage", function (data) {
 
                 console.log("ReceiveMessage");
             var message = document.createElement("div");
-            message.classList.add('message');
+            message.classList.add("message");
 
             var header = document.createElement("header");
             header.appendChild(document.createTextNode(data.name));
@@ -435,14 +177,15 @@
 
             document.getElementById("messageDiv").append(message)
         });
+
         connection.on("ReceiveGif"), function (data)
         {
             console.log("Gif Received!");
             var message = document.createElement("div");
-            message.classList.add('message');
+            message.classList.add("message");
 
             var header = document.createElement("header");
-            header.appendChild(document.createTextNode(data.name));
+            header.appendChild(document.createTextNode(data.Name));
 
             var img = document.createElement("img");
             img.src = data.GifUrl;
@@ -451,7 +194,7 @@
 
 
             var small = document.createElement("small");
-            var text = data.timestamp;
+            var text = data.Timestamp;
             small.appendChild(document.createTextNode(text));
 
             message.appendChild(header);
@@ -460,23 +203,50 @@
 
             document.getElementById("messageDiv").append(message)
         }
-            //
+
+        connection.on("UserJoinedChannel", function (data)
+        {
+             console.log("UserJoinedChannel");
+            //msg in chat
+            var message = document.createElement("div");
+            message.classList.add("message");
+
+            var header = document.createElement("header");
+            header.appendChild(document.createTextNode(data.name));
+
+            var p = document.createElement("p");
+            p.appendChild(document.createTextNode(data.text));
+
+            var small = document.createElement("small");
+            var text = data.timestamp;
+            small.appendChild(document.createTextNode(text));
+
+            message.appendChild(header);
+            message.appendChild(p);
+            message.appendChild(small);
+
+             document.getElementById("messageDiv").append(message)
+
+
+
+            });
+
         connection.on("UserLeftChannel", function (data) {
 
         console.log("UserLeftChannel");
             // log data
-            console.log('data', data);
+            console.log("data", data);
 
-            // create user left message 
+            // create user left message
 
             var message = document.createElement("div");
-            message.classList.add('message');
+            message.classList.add("message");
 
             var header = document.createElement("header");
             header.appendChild(document.createTextNode("server"));
 
                 var p = document.createElement("p");
-                p.appendChild(document.createTextNode(data.profileName + ' went offline. '));
+                p.appendChild(document.createTextNode(data.profileName + " went offline. "));
 
 
 
@@ -486,69 +256,53 @@
 
 
                 console.log(data.profileId);
-            // remove from online list and put into offline   
+            // remove from online list and put into offline
                 document.getElementById(data.profileId).remove();
                 console.log("remove from online list");
 
             var ele = document.getElementById("onlineList");
             ele.appendChild(divElement);
-  
+
 
               document.getElementById("messageDiv").append(message)
-                var element = document.getElementsByClassName('offline');
+                var element = document.getElementsByClassName("offline");
 
 
 
 
             });
-            //
+
         connection.on("UpdateUsersOnline", function (data) {
             console.log("UpdateUsersOnline");
-            
+
             document.getElementsByClassName("user")
                 data.forEach(element => addProfile(element));
-            });
-            //
+        });
 
-            //
-            var addProfile = function (data)
-            {
-                if ("@Model.ProfileId" != data.profileId)
-                {
-                    console.log("addProfile");
-                     
-                     console.log(data.profileId);
-                     console.log(data.profileName);
-                     var element = document.getElementsByClassName('flexbox-item flexbox-item-3');
-                     var divElement = document.createElement("div");
-                     var spanElement = document.createElement("span");
-                     spanElement.innerText = data.profileName;
-                     divElement.id = data.profileId;
-                     if("@Model.OwnerId"==data.profileId)
-                     {
-                         spanElement.innerText+=" (owner) ";
-                     }
-                      
-                      divElement.appendChild(spanElement);
-                      divElement.classList.add("user");
-                       var ele = document.getElementById("onlineList");
-                         ele.appendChild(divElement);
-                
-                }
-                
+        //#endregion
 
-            
-            }
-            //
-            var sendMessage = function(event)
+       //#region axios | post
+           // join channel
+        var joinChannel = function () {
+        var url = "/Chat/JoinChannel/" + _connectionId + "/@Model.Id"
+        axios.post(url, null)
+            .then(res => {
+                    console.log("Channel Joined!", res);
+
+                })
+            .catch(err => {
+                    console.log("Failed to join Channel!", err);
+                })
+        }
+        var sendMessage = function(event)
             {
                 console.log("sendMessage");
               console.log(event);
                     event.preventDefault();
 
                     var data = new FormData(event.target);
-                    document.getElementById('user-input').value = '';
-                    axios.post('/Chat/SendMessage',data)
+                    document.getElementById("user-input").value = "";
+                    axios.post("/Chat/SendMessage",data)
                     .then(res=>{
                         console.log("Message Sent!")
 
@@ -560,23 +314,22 @@
         }
         var sendGif = function (data) {
             console.log("sendGif");
-            debugger;
 
-
-            console.log(data);
             var formData = new FormData();
-            formData.set('chatId', data.chatId);
-            formData.set('gifUrl', data.gifUrl);
+            formData.set("chatId", data.chatId);
+            formData.set("gifUrl", data.gifUrl);
 
             axios({
-                method: 'post',
-                url: '/Chat/SendGif',
+                method: "post",
+                url: "/Chat/SendGif",
                 data: formData,
-                headers: { 'Content-type': 'multipart/form-data' }
+                headers: { "Content-type": "multipart/form-data" }
             }).then(res => {
                 console.log("Gif Sent!")
+                hideGifInputElements();
             }).catch(err => { console.log(err) })
-               
+
+
 
               // a    console.log("Failed to send Gif")xios.post('/Chat/SendGif', data)
               // .then(res=>{
@@ -584,9 +337,294 @@
               // })
               // .catch(err=>{
               //     console.log("Failed to send Gif")
-              // 
+              //
               // })
             }
+
+        //#endregion
+
+       //#region js wiht use of -Model
+        var displayCurrentUserOnline = function () {
+
+                  var divElement = document.createElement("div");
+                  var spanElement = document.createElement("span");
+                  spanElement.innerText = username;
+                  divElement.id = profileIdentifier;
+                  if ("@Model.OwnerId" == profileIdentifier) {
+                      spanElement.innerText += " (owner) ";
+                  }
+
+                  divElement.appendChild(spanElement);
+                  divElement.classList.add("user");
+                  var ele = document.getElementById("onlineList");
+                  ele.appendChild(divElement);
+
+        }
+       //#endregion
+
+
+        // clear messagesDiv
+        var clearMessagesDiv = function () {
+    console.log("Clear Messages Div");
+    var messagesNode = document.getElementById("messageDiv");
+    messagesNode.innerHTML = "";
+}
+
+        // display first 10 GIFS
+        var displayGifs = function () {
+    console.log("displayGifs");
+    console.log("searchResultsGif");
+    console.log(searchResultsGif);
+    if (searchResultsGif != null && searchResultsGif !== undefined) {
+        var i = 0;
+        for (i; i < 10; i++) {
+            var url = searchResultsGif.data[i].images.original.url;
+            var image = document.createElement("img");
+            image.width = 150;
+            image.height = 150;
+            image.src = url;
+
+            var messagesNode = document.getElementById("messageDiv");
+            messagesNode.appendChild(image);
+
+        }
+
+    }
+
+
+
+    hideChatInputElements();
+
+    displayGifInputElements();
+
+
+}
+
+        var displayMessages = function()
+        {
+            clearMessagesDiv();
+
+        }
+
+        //HIDE CHAT input elements
+        var hideChatInputElements = function () {
+    console.log("hideChatInputElements");
+    var chatinput = document.getElementById("user-input");
+    chatinput.style.display = "none";
+
+    console.log("hide message-input complete");
+    var gificon = document.getElementById("gifImg");
+    gificon.style.display = "none";
+
+    console.log("hide gificon complete");
+    var fileIcon = document.getElementById("file-upload");
+    fileIcon.style.display = "none";
+
+    console.log("hide fileIcon complete");
+    var filelLabel = document.getElementsByClassName("custom-file-upload")[0];
+    filelLabel.style.display = "none";
+
+    console.log("hide filelLabel complete");
+
+
+
+}
+
+        //HIDE GiF input elements
+        var hideGifInputElements = function () {
+        console.log("hideGifInputElements");
+        var middleContainer = document.getElementsByClassName("flexbox-item flexbox-item-2")[0];
+        console.log(middleContainer);
+        var gifInputForm = document.getElementsByClassName("chat-input")[0];
+        console.log(gifInputForm);
+        middleContainer.replaceChild(chatInputForm, gifInputForm);
+            var msgeDiv = document.getElementById("messageDiv");
+            msgeDiv.innerHTML = "";
+            var messages = "@Html.Raw(Model.SelectedChannel.Chat.Messages)";
+
+            @foreach (var message in Model.SelectedChannel.Chat.Messages)
+            {
+                
+                @:displayMessage("@message.ProfileName","@message.Type","@message.Text","@message.Timestamp");
+            }
+            //console.log(messages);
+            console.log("replace succes");
+        }
+
+        // display message
+        var displayMessage = function (profileName,messageType,messageText,messageTimeStamp)
+        {
+            console.log(profileName);
+            console.log(messageType);
+            console.log(messageText);
+            console.log(messageTimeStamp);
+
+            var msgeDiv = document.getElementById("messageDiv");
+
+            var divElement = document.createElement("div");
+            divElement.classList.add("message");
+            var header = document.createElement("header");
+            header.innerHTML = profileName;
+            divElement.appendChild(header);
+            if (messageType == "Text") {
+             var p = document.createElement("p");
+             p.innerHTML = messageText;
+             divElement.appendChild(p);
+
+            } else if (messageType == "Gif" ||"Image")
+            {
+                var img = document.createElement("img")
+                img.src = messageText;
+                img.width = 150;
+                img.height = 150;
+                divElement.appendChild(img);
+
+            }else if (messageType == "File")
+            {
+
+            }
+            var small = document.createElement("small");
+            small.innerHTML = messageTimeStamp
+            divElement.appendChild(small);
+
+            msgeDiv.appendChild(divElement);
+        
+            
+
+        }
+        //DISPLAY GiF input elements
+        var displayGifInputElements = function () {
+
+        console.log("displayGifInputElements");
+        var middleContainer = document.getElementsByClassName("flexbox-item flexbox-item-2")[0];
+
+        var chatinput = document.createElement("input");
+        chatinput.id = "gifInputString";
+
+
+        var button = document.createElement("button");
+        button.id = "giphyButton#";
+        button.innerText = "Giphy";
+        button.onclick = function () {
+
+        console.log("Looking up Gifs for entered keyword : " + chatinput.value);
+        query = "&q=" + chatinput.value;
+        console.log(query);
+        url = api + apiKey + query;
+
+        console.log("fetched url: " + url);
+        fetch(url)
+            .then(response => response.json())
+            .then(content => {
+
+                console.log(content.data);
+                console.log("META", content.data);
+
+                updateGifs(content.data);
+
+                this.value = "";
+            })
+            .catch(err => {
+                console.error(err);
+            });
+
+        console.log("end of onclick event");
+    }
+
+
+    var gifInputForm = document.createElement("div");
+    gifInputForm.classList.add("chat-input");
+    gifInputForm.appendChild(chatinput);
+
+    gifInputForm.appendChild(button);
+
+    chatInputForm = document.getElementsByClassName("chat-input")[0];
+    middleContainer.replaceChild(gifInputForm, chatInputForm);
+
+
+
+    console.log("show gif input - succes");
+
+
+}
+
+        var updateGifs = function (data) {
+    console.log("updateGifs");
+    console.log(data);
+    var i = 0;
+    for (i; i < 10; i++) {
+        if (data[i] != null && data[i] != undefined) {
+            var url = data[i].images.original.url;
+            var image = document.createElement("img");
+            image.width = 150;
+            image.height = 150;
+            image.src = url;
+            image.id = "gif-input";
+            image.value = url;
+
+            var form = document.createElement("form");
+
+            var hiddenInputChatId = document.createElement("input");
+            hiddenInputChatId.type = "hidden";
+            hiddenInputChatId.class = "gif-input";
+            hiddenInputChatId.name = "chatId";
+            hiddenInputChatId.value = "@Model.SelectedChannel.Chat.Id";
+
+            var inputGif = document.createElement("input");
+            inputGif.type = "hidden";
+            inputGif.class = "gif-input";
+            inputGif.name = "gifUrl";
+            inputGif.value = url;
+
+
+            form.appendChild(hiddenInputChatId);
+            form.appendChild(inputGif);
+            form.appendChild(image);
+
+            form.addEventListener("click", function (e) {
+                console.log("clicked on gif");
+                var data = {
+                    chatId: hiddenInputChatId.value,
+                    gifUrl: url
+                }
+                sendGif(data);
+
+
+            });
+
+            var messagesNode = document.getElementById("messageDiv");
+            messagesNode.appendChild(form);
+        }
+
+    }
+}
+
+
+        var addProfile = function (data) {
+        if ("@Model.ProfileId" != data.profileId) {
+        console.log("addProfile");
+
+        console.log(data.profileId);
+        console.log(data.profileName);
+        var element = document.getElementsByClassName("flexbox-item flexbox-item-3");
+        var divElement = document.createElement("div");
+        var spanElement = document.createElement("span");
+        spanElement.innerText = data.profileName;
+        divElement.id = data.profileId;
+        if ("@Model.OwnerId" == data.profileId) {
+            spanElement.innerText += " (owner) ";
+        }
+
+        divElement.appendChild(spanElement);
+        divElement.classList.add("user");
+        var ele = document.getElementById("onlineList");
+        ele.appendChild(divElement);
+
+    }
+
+
+
+}
 
 
     </script>
