@@ -28,22 +28,22 @@
 
             @foreach (var message in Model.SelectedChannel.Chat.Messages)
             {
-
                 <div class="message">
                     <header>@message.ProfileName</header>
-                    @if (message.Type == MessageType.Text)
-                    {<p>@message.Text</p>}
-                else
-                @if (message.Type == MessageType.Gif || message.Type == MessageType.Image)
-               {<img src="@message.Text" width="150" height="150" />}
-            else
-            @if (message.Type == MessageType.File)
-           {<img src="@message.Text" />}
-
-
-            <small>@message.Timestamp.ToShortTimeString()</small>
-        </div>
-    }
+                       @if (message.Type == MessageType.Text)
+                       {
+                           <p>@message.Text</p>
+                       }
+                       else if (message.Type == MessageType.Gif || message.Type == MessageType.Image)
+                       {
+                           <img src="@message.Text" width="150" height="150" />
+                       }else if (message.Type == MessageType.File)
+                       {
+                           <img src="@message.Text" />
+                       }
+                      <small>@message.Timestamp.ToShortTimeString()</small>
+                 </div>
+            }
         </div>
         <!--user input-->
         <form id="inputsendmessage" class="chat-input" onsubmit="sendMessage(event)" asp-controller="Chat" asp-action="CreateMessage">
@@ -84,7 +84,7 @@
     {
     <script>
 
-       //#region props
+       //#region holds chatInputForm
           var chatInputForm;
        //#endregion
 
@@ -97,14 +97,11 @@
 
        // #region onload
         window.onload = function () {
+            displayCurrentUserOnline();
              // make input element visible
              document.getElementById("inputsendmessage").style="block";
              var element = document.getElementById("messageDiv");
             element.scrollTop = element.scrollHeight;
-
-
-            displayCurrentUserOnline();
-
 
              }
          //#endregion
@@ -146,9 +143,6 @@
                 console.log("inside click on gif event");
                 displayGifInputElements();
                 clearMessagesDiv();
-                document.getElementById("file-upload").style.display = "none";
-
-
             });
         });
         // #endregion
@@ -157,7 +151,8 @@
 
         connection.on("ReceiveMessage", function (data) {
 
-                console.log("ReceiveMessage");
+            console.log("ReceiveMessage");
+            console.log(data);
             var message = document.createElement("div");
             message.classList.add("message");
 
@@ -180,7 +175,7 @@
 
         connection.on("ReceiveGif"), function (data)
         {
-            console.log("Gif Received!");
+            console.log("ReceiveGif");
             var message = document.createElement("div");
             message.classList.add("message");
 
@@ -331,19 +326,12 @@
 
 
 
-              // a    console.log("Failed to send Gif")xios.post('/Chat/SendGif', data)
-              // .then(res=>{
-              //  })   console.log("Gif Sent!")
-              // })
-              // .catch(err=>{
-              //     console.log("Failed to send Gif")
-              //
-              // })
+
             }
 
         //#endregion
 
-       //#region js wiht use of -Model
+       //#region  -Model functions
         var displayCurrentUserOnline = function () {
 
                   var divElement = document.createElement("div");
@@ -363,14 +351,14 @@
        //#endregion
 
 
-        // clear messagesDiv
+        // CLEAR messages
         var clearMessagesDiv = function () {
     console.log("Clear Messages Div");
     var messagesNode = document.getElementById("messageDiv");
     messagesNode.innerHTML = "";
 }
 
-        // display first 10 GIFS
+        // DISPLAY first 10 GIFS
         var displayGifs = function () {
     console.log("displayGifs");
     console.log("searchResultsGif");
@@ -406,7 +394,7 @@
 
         }
 
-        //HIDE CHAT input elements
+        // HIDE CHAT input elements
         var hideChatInputElements = function () {
     console.log("hideChatInputElements");
     var chatinput = document.getElementById("user-input");
@@ -430,7 +418,7 @@
 
 }
 
-        //HIDE GiF input elements
+        // HIDE GIF input elements
         var hideGifInputElements = function () {
         console.log("hideGifInputElements");
         var middleContainer = document.getElementsByClassName("flexbox-item flexbox-item-2")[0];
@@ -441,26 +429,18 @@
             var msgeDiv = document.getElementById("messageDiv");
             msgeDiv.innerHTML = "";
             var messages = "@Html.Raw(Model.SelectedChannel.Chat.Messages)";
-
             @foreach (var message in Model.SelectedChannel.Chat.Messages)
             {
-                
                 @:displayMessage("@message.ProfileName","@message.Type","@message.Text","@message.Timestamp");
             }
             //console.log(messages);
             console.log("replace succes");
         }
 
-        // display message
+        // DISPLAY message
         var displayMessage = function (profileName,messageType,messageText,messageTimeStamp)
         {
-            console.log(profileName);
-            console.log(messageType);
-            console.log(messageText);
-            console.log(messageTimeStamp);
-
             var msgeDiv = document.getElementById("messageDiv");
-
             var divElement = document.createElement("div");
             divElement.classList.add("message");
             var header = document.createElement("header");
@@ -492,7 +472,7 @@
             
 
         }
-        //DISPLAY GiF input elements
+        // DISPLAY GiF input elements
         var displayGifInputElements = function () {
 
         console.log("displayGifInputElements");
@@ -547,10 +527,10 @@
 
 
 }
-
+        // UPDATE Gifs
         var updateGifs = function (data) {
     console.log("updateGifs");
-    console.log(data);
+   
     var i = 0;
     for (i; i < 10; i++) {
         if (data[i] != null && data[i] != undefined) {
@@ -599,7 +579,7 @@
     }
 }
 
-
+         // ADD PROFILE
         var addProfile = function (data) {
         if ("@Model.ProfileId" != data.profileId) {
         console.log("addProfile");

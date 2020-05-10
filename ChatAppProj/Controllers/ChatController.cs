@@ -177,7 +177,7 @@ namespace ChatApp.Controllers
             var Message = new Message()
             {
                 Chat = chat,
-                ChatId = chatId,
+                ChatId = chat.Id,
                 Text = gifUrl,
                 ProfileName = User.Identity.Name,
                 Timestamp = DateTime.Now,
@@ -186,14 +186,16 @@ namespace ChatApp.Controllers
             _chatService.InsertMessage(Message);
             await _chatService.SaveChangesAsync();
 
-            await _chat.Clients.Group(chatId.ToString())
-            .SendAsync("ReceiveGif", new
-            {
-                GifUrl = Message.Text,
-                Name = Message.ProfileName,
-                Timestamp = Message.Timestamp.ToShortTimeString()
-            });
-            return RedirectToAction("JoinChannel","Channel", new { channelId = channel.Id });
+            await _chat.Clients.Group(chatId.ToString()) 
+           .SendAsync("ReceiveGif", new
+           {
+               GifUrl = Message.Text,
+               Name = Message.ProfileName,
+               Timestamp = Message.Timestamp.ToShortTimeString()
+           });
+
+            return Ok();
+          
         }
     }
 }
