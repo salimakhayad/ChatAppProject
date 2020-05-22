@@ -37,7 +37,6 @@ namespace ChatApp.Hubs
 
             var trs = _chatService.GetAllTimeRegistrations().Where(t => t.ChatId == tr.ChatId && tr.IsOnline);
             var channelId = _chatService.GetAllChats().FirstOrDefault(c => c.Id == tr.ChatId).ChannelId.ToString();
-            //var channelId = _chatService.GetAllChannels().FirstOrDefault(c => c.Chat.Id == tr.ChatId).Id.ToString();
             var usersCurrentlyOnline = trs.Select(tr => tr.ProfileName);
 
             Clients.Group(channelId).

@@ -102,10 +102,7 @@ namespace ChatApp.Controllers
             model.SelectedChannel = selectedChannel;
             model.Id = currentGroup.Id;
         
-
-
             return View("Views/Group/ChannelSelected.cshtml", model);
-
         }
       
         public IActionResult Create(int groupId)

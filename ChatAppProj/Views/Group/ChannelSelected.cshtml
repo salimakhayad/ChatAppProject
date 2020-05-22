@@ -151,7 +151,7 @@
             console.log("printFile not implemented yet");
         }
         var printImage = function (data) {
-           
+
             console.log("printImage not implemented yet");
         }
         var printMessage = function (data) {
@@ -202,7 +202,7 @@
         }
         //#endregion
        //#region Hub | connection.on
-       
+
         connection.on("ReceiveMessage", function (data) {
             //  MessageType.Text, 0 | MessageType.File, 1 |MessageType.Image,2 | MessageType.Gif   3
             console.log("ReceiveMessage");
@@ -211,7 +211,7 @@
             else if (data.type == 1) { printFile(data);}
             else if (data.type == 2) { printImage(data);}
             else if (data.type == 3) { printGif(data)}
-            
+
             }
         );
 
@@ -285,7 +285,7 @@
         });
         //#endregion
        //#region axios | post
-           // join channel
+
         var joinChannel = function () {
         var url = "/Chat/JoinChannel/" + _connectionId + "/@Model.Id"
         axios.post(url, null)
@@ -317,6 +317,7 @@
         }
         var sendGif = function (data) {
 
+            swapGifInputWithChatInput();
             console.log("sendGif");
 
             var formData = new FormData();
@@ -330,15 +331,14 @@
                 headers: { "Content-type": "multipart/form-data" }
             }).then(res => {
                 console.log("Gif Sent!")
-                hideGifInputElements();
-               
+
+
             }).catch(err => { console.log(err) })
 
 
 
 
             }
-
         //#endregion
 
        //#region  -Model functions
@@ -366,36 +366,6 @@
     console.log("Clear Messages Div");
     var messagesNode = document.getElementById("messageDiv");
     messagesNode.innerHTML = "";
-}
-
-        // DISPLAY first 10 GIFS
-        var displayGifs = function () {
-    console.log("displayGifs");
-    console.log("searchResultsGif");
-    console.log(searchResultsGif);
-    if (searchResultsGif != null && searchResultsGif !== undefined) {
-        var i = 0;
-        for (i; i < 10; i++) {
-            var url = searchResultsGif.data[i].images.original.url;
-            var image = document.createElement("img");
-            image.width = 150;
-            image.height = 150;
-            image.src = url;
-
-            var messagesNode = document.getElementById("messageDiv");
-            messagesNode.appendChild(image);
-
-        }
-
-    }
-
-
-
-    hideChatInputElements();
-
-    displayGifInputElements();
-
-
 }
 
         var displayMessages = function()
@@ -428,10 +398,10 @@
 
 }
 
-        // HIDE GIF input elements
-        var hideGifInputElements = function ()
+        // swap GIF input and  with TEXT input
+        var swapGifInputWithChatInput = function ()
         {
-        console.log("hideGifInputElements");
+            console.log("swapGifInputWithChatInput");
         var middleContainer = document.getElementsByClassName("flexbox-item flexbox-item-2")[0];
             console.log(middleContainer);
 
@@ -481,42 +451,36 @@
             divElement.appendChild(small);
 
             msgeDiv.appendChild(divElement);
-        
-            
+
+
 
         }
 
         // DISPLAY GiF input elements
         var displayGifInputElements = function () {
 
-        console.log("displayGifInputElements");
-        var middleContainer = document.getElementsByClassName("flexbox-item flexbox-item-2")[0];
+              console.log("displayGifInputElements");
+              var middleContainer = document.getElementsByClassName("flexbox-item flexbox-item-2")[0];
 
-        var chatinput = document.createElement("input");
-        chatinput.id = "gifInputString";
+              var chatinput = document.createElement("input");
+              chatinput.id = "gifInputString";
 
 
-        var button = document.createElement("button");
-        button.id = "giphyButton#";
-        button.innerText = "Giphy";
-        // <form id="inputsendmessage" class="chat-input" onsubmit="sendMessage(event)" asp-controller="Chat" asp-action="CreateMessage">
-        //    var form = document.createElement("form");
-        //    form.classList.add("chat-input");
-        //    form.id = "inputsendGif";
-        //    form.onsubmit = sendGif(event);
-           // form.asp-action
-        button.onclick = function () {
+              var button = document.createElement("button");
+              button.id = "giphyButton#";
+              button.innerText = "Giphy Search";
 
-        console.log("Looking up Gifs for entered keyword : " + chatinput.value);
-        query = "&q=" + chatinput.value;
-        console.log(query);
-        url = api + apiKey + query;
+              button.onclick = function () {
 
-        console.log("fetched url: " + url);
-        fetch(url)
-            .then(response => response.json())
+              console.log("Looking up Gifs for entered keyword : " + chatinput.value);
+              query = "&q=" + chatinput.value;
+              console.log(query);
+              url = api + apiKey + query;
+
+              console.log("fetched url: " + url);
+              fetch(url)
+                  .then(response => response.json())
             .then(content => {
-
                 console.log(content.data);
                 console.log("META", content.data);
 
@@ -549,58 +513,38 @@
 }
         // UPDATE Gifs
         var updateGifs = function (data) {
-    console.log("updateGifs");
-   
-    var i = 0;
-    for (i; i < 10; i++) {
-        if (data[i] != null && data[i] != undefined) {
-            var url = data[i].images.original.url;
-            var image = document.createElement("img");
-            image.width = 150;
-            image.height = 150;
-            image.src = url;
-            image.id = "gif-input";
-            image.value = url;
+         console.log("updateGifs");
 
-            var form = document.createElement("form");
-            
-             // <form id="inputsendmessage" class="chat-input" onsubmit="sendMessage(event)" asp-controller="Chat" asp-action="CreateMessage">
-            var hiddenInputChatId = document.createElement("input");
-            hiddenInputChatId.type = "hidden";
-            hiddenInputChatId.class = "gif-input";
-            hiddenInputChatId.name = "chatId";
-            hiddenInputChatId.value = "@Model.SelectedChannel.Chat.Id";
+         var i = 0;
+         for (i; i < 10; i++) {
+             if (data[i] != null && data[i] != undefined) {
+                 var url = data[i].images.original.url;
+           
+                 var image = document.createElement("img");
+                 image.width = 150;
+                 image.height = 150;
+                 image.src = url;
+                 image.id = "gif-input";
+                 image.value = url;
 
-            var inputGif = document.createElement("input");
-            inputGif.type = "hidden";
-            inputGif.class = "gif-input";
-            inputGif.name = "gifUrl";
-            inputGif.value = url;
+                 image.addEventListener("click", function (e) {
+                     console.log("clicked on gif");
+               
+                     var data = {
+                         chatId:"@Model.SelectedChannel.Chat.Id",
+                         gifUrl: url
+                     };
+                     sendGif(data);
+                 });
 
+          
 
-            form.appendChild(hiddenInputChatId);
-            form.appendChild(inputGif);
-            form.appendChild(image);
+                 var messagesNode = document.getElementById("messageDiv");
+                 messagesNode.appendChild(image);
+             }
 
-            form.addEventListener("click", function (e) {
-                console.log("clicked on gif");
-                var data = {
-                    chatId: hiddenInputChatId.value,
-                    gifUrl: url
-                }
-                sendGif(data);
-
-
-
-            });
-
-            var messagesNode = document.getElementById("messageDiv");
-            messagesNode.appendChild(form);
-        }
-
-    }
+         }
 }
-
          // ADD PROFILE
         var addProfile = function (data) {
         if ("@Model.ProfileId" != data.profileId) {
