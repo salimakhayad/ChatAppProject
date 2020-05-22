@@ -518,8 +518,9 @@
          var i = 0;
          for (i; i < 10; i++) {
              if (data[i] != null && data[i] != undefined) {
+
                  var url = data[i].images.original.url;
-           
+                 console.log(url);
                  var image = document.createElement("img");
                  image.width = 150;
                  image.height = 150;
@@ -529,10 +530,10 @@
 
                  image.addEventListener("click", function (e) {
                      console.log("clicked on gif");
-               
+                     console.log(this);
                      var data = {
                          chatId:"@Model.SelectedChannel.Chat.Id",
-                         gifUrl: url
+                         gifUrl: this.value
                      };
                      sendGif(data);
                  });
