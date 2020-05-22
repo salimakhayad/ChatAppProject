@@ -24,7 +24,7 @@ namespace ChatApp.Controllers
         private readonly IUserClaimsPrincipalFactory<Profile> _claimsPrincipalFactory;
         private readonly SignInManager<Profile> _signInManager;
         private readonly UserManager<Profile> _userManager;
-        //private Profile _currentProfile;
+
 
         public ChannelController(IChatService service, IUserStore<Profile> userStore, UserManager<Profile> userManager, IUserClaimsPrincipalFactory<Profile> claimsPrincipalFactory, SignInManager<Profile> signInManager)
         {
@@ -35,7 +35,7 @@ namespace ChatApp.Controllers
             this._signInManager = signInManager;
         }
        
-        public IActionResult JoinChannel(int channelId)
+        public IActionResult Join(int channelId)
         {
             // set viewbag => Channel - nameOfChannel
             ChannelSelectedViewModel model = new ChannelSelectedViewModel();
@@ -108,9 +108,9 @@ namespace ChatApp.Controllers
 
         }
       
-        public IActionResult CreateGet(int groupId)
+        public IActionResult Create(int groupId)
         {
-            // set viewbag => Channel - Create
+           
             var groupFromDb = _chatService.GetAllGroups().FirstOrDefault(g => g.Id == groupId);
 
             CreateChannelModel model = new CreateChannelModel()
@@ -123,7 +123,7 @@ namespace ChatApp.Controllers
 
         }
         [HttpPost]
-        public IActionResult CreatePost(CreateChannelModel model)
+        public IActionResult Create(CreateChannelModel model)
         {
             if (ModelState.IsValid)
             {
@@ -156,7 +156,7 @@ namespace ChatApp.Controllers
        
                 _chatService.SaveChanges();
        
-                return RedirectToAction("JoinChannel", "Channel", new { channelId = channelFromDb.Id });
+                return RedirectToAction("Join", "Channel", new { channelId = channelFromDb.Id });
        
             }
             else

@@ -35,23 +35,18 @@ namespace ChatApp.Hubs
             tr.IsOnline = false;
             _chatService.SaveChanges();
 
-           // Clients.All.SendAsync("setUserOffline", profile.UserName);
-
             var trs = _chatService.GetAllTimeRegistrations().Where(t => t.ChatId == tr.ChatId && tr.IsOnline);
-
+            var channelId = _chatService.GetAllChats().FirstOrDefault(c => c.Id == tr.ChatId).ChannelId.ToString();
+            //var channelId = _chatService.GetAllChannels().FirstOrDefault(c => c.Chat.Id == tr.ChatId).Id.ToString();
             var usersCurrentlyOnline = trs.Select(tr => tr.ProfileName);
 
-            Clients.Group(tr.ChatId.ToString()).
+            Clients.Group(channelId).
             SendAsync("UserLeftChannel", 
             new
             {
                 ProfileName = profile.UserName,
                 ProfileId = profile.Id  
             });
-
-            // Clients.Group(tr.ChatId.ToString()).
-            // SendAsync("UpdateUsersOnline", usersCurrentlyOnline);
-
 
             return base.OnDisconnectedAsync(ex);
            

@@ -40,7 +40,28 @@ namespace ChatApp.Controllers
             this._userStore = userStore;
             this._signInManager = signInManager;
         }
-        
+        [HttpPost]
+        public async Task<IActionResult> CreateGif(int chatId, string message)
+        {
+            var chat = _chatService.GetAllChats().FirstOrDefault(c => c.Id == chatId);
+            var channelId = _chatService.GetAllChannels().FirstOrDefault(c => c.Id == chat.ChannelId).Id.ToString();
+
+            var Message = new Message()
+            {
+                Chat = chat,
+                ChatId = chat.Id,
+                Text = message,
+                ProfileName = User.Identity.Name,
+                Timestamp = DateTime.Now,
+                Type = MessageType.Gif
+            };
+            _chatService.InsertMessage(Message);
+            await _chatService.SaveChangesAsync();
+          
+            var channel = _chatService.GetAllChannels().FirstOrDefault(channel => channel.Chat.Id == chatId);
+
+            return RedirectToAction("Join", "Channel", new { channelId = channelId });
+        }
         [HttpPost]
         public async Task<IActionResult> CreateMessage(int chatId, string message)
         {
@@ -51,14 +72,13 @@ namespace ChatApp.Controllers
                 ProfileName = User.Identity.Name,
                 Timestamp = DateTime.Now,
                 Type = MessageType.Text
-  
             };
             _chatService.InsertMessage(Message);
             await _chatService.SaveChangesAsync();
             var chat = _chatService.GetAllChats().FirstOrDefault(c => c.Id == chatId);
             var channel = _chatService.GetAllChannels().FirstOrDefault(channel => channel.Chat.Id == chatId);
-
-            return RedirectToAction("JoinChannel","Channel", new { channelId = channel.Id });
+        
+            return RedirectToAction("Join","Channel", new { channelId = channel.Id });
         }
         //http://localhost:5001/Chat/JoinChannel?channelId=1
 
@@ -74,7 +94,7 @@ namespace ChatApp.Controllers
             var profile = _chatService.GetAllProfiles().Where(x => x.Id == profileId).FirstOrDefault();
 
 
-            await _chat.Clients.Group(chat.Id.ToString())
+            await _chat.Clients.Group(channelId)
             .SendAsync("UserJoinedChannel", new
             {
                 Text = " has joined.",
@@ -123,7 +143,7 @@ namespace ChatApp.Controllers
                 
             }
            
-            await _chat.Clients.Group(chat.Id.ToString()).
+            await _chat.Clients.Group(channelId).
             SendAsync("UpdateUsersOnline", sortedUserList)
             ;
 
@@ -144,6 +164,7 @@ namespace ChatApp.Controllers
             )
         {
             var chat = _chatService.GetAllChats().FirstOrDefault(c=>c.Id==chatId);
+            var channelId = _chatService.GetAllChannels().FirstOrDefault(c => c.Id == chat.ChannelId).Id.ToString();
             var Message = new Message()
             {
                 Chat = chat,
@@ -156,16 +177,17 @@ namespace ChatApp.Controllers
             _chatService.InsertMessage(Message);
             await _chatService.SaveChangesAsync();
 
-            await _chat.Clients.Group(chatId.ToString())
+            await _chat.Clients.Group(channelId)
             .SendAsync("ReceiveMessage", new
             {
                 Text = Message.Text,
                 Name = Message.ProfileName,
-                Timestamp = Message.Timestamp.ToShortTimeString()
+                Timestamp = Message.Timestamp.ToShortTimeString(),
+                Type = MessageType.Text
             });
             return Ok();
         }
-
+        // axios.post('/Chat/SendGif', data)
         [HttpPost("[action]")]
         public async Task<ActionResult> SendGif(
            int chatId,
@@ -173,7 +195,8 @@ namespace ChatApp.Controllers
            )
         {
             var chat = _chatService.GetAllChats().FirstOrDefault(c => c.Id == chatId);
-            var channel = _chatService.GetAllChannels().FirstOrDefault(c => c.Chat.Id==chatId);
+            var channelId = _chatService.GetAllChannels().FirstOrDefault(c => c.Id == chat.ChannelId).Id.ToString();
+
             var Message = new Message()
             {
                 Chat = chat,
@@ -186,13 +209,15 @@ namespace ChatApp.Controllers
             _chatService.InsertMessage(Message);
             await _chatService.SaveChangesAsync();
 
-            await _chat.Clients.Group(chatId.ToString()) 
-           .SendAsync("ReceiveGif", new
-           {
-               GifUrl = Message.Text,
-               Name = Message.ProfileName,
-               Timestamp = Message.Timestamp.ToShortTimeString()
-           });
+            await _chat.Clients.Group(channelId)
+              .SendAsync("ReceiveMessage", new
+              {
+                  Text = Message.Text,
+                  Name = Message.ProfileName,
+                  Timestamp = DateTime.Now.ToShortTimeString(),
+                  Type = MessageType.Gif
+              });
+
 
             return Ok();
           

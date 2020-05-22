@@ -73,10 +73,7 @@ namespace ChatApp
         public void Configure(IApplicationBuilder app)//, IWebHostEnvironment env
         {
             app.UseHttpsRedirection();
-           // if (env.IsDevelopment())
-           // {
-           //  app.UseDeveloperExceptionPage();
-           // }
+
             app.UseStaticFiles();
             app.UseAuthentication();
            

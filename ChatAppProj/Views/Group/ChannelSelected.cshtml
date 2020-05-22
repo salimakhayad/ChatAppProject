@@ -14,7 +14,7 @@
         @foreach (var channel in Model.Channels)
         {
             <div class="channelText">
-                <form asp-action="JoinChannel" asp-controller="Channel" asp-route-channelId="@channel.Id">
+                <form asp-action="Join" asp-controller="Channel" asp-route-channelId="@channel.Id">
                     <button type="submit"><span>@channel.Name</span></button>
                 </form>
             </div>
@@ -55,7 +55,7 @@
             </label>
             <input id="file-upload" type="file" />
 
-            <!--Tekst-->
+            <!--Text-->
             <input type="text" name="message" id="user-input" autofocus />
 
             <!--Gif-->
@@ -146,13 +146,16 @@
             });
         });
         // #endregion
-
-       //#region Hub | connection.on
-
-        connection.on("ReceiveMessage", function (data) {
-
-            console.log("ReceiveMessage");
-            console.log(data);
+        //#region printFunctions
+        var printFile = function (data) {
+            console.log("printFile not implemented yet");
+        }
+        var printImage = function (data) {
+           
+            console.log("printImage not implemented yet");
+        }
+        var printMessage = function (data) {
+            console.log("printMessage");
             var message = document.createElement("div");
             message.classList.add("message");
 
@@ -171,25 +174,23 @@
             message.appendChild(small);
 
             document.getElementById("messageDiv").append(message)
-        });
-
-        connection.on("ReceiveGif"), function (data)
-        {
-            console.log("ReceiveGif");
+        }
+        var printGif = function (data) {
+            console.log("printGif");
             var message = document.createElement("div");
             message.classList.add("message");
 
             var header = document.createElement("header");
-            header.appendChild(document.createTextNode(data.Name));
+            header.appendChild(document.createTextNode(data.name));
 
             var img = document.createElement("img");
-            img.src = data.GifUrl;
+            img.src = data.text;
             img.width = 150;
             img.height = 150;
 
 
             var small = document.createElement("small");
-            var text = data.Timestamp;
+            var text = data.timestamp;
             small.appendChild(document.createTextNode(text));
 
             message.appendChild(header);
@@ -197,7 +198,22 @@
             message.appendChild(small);
 
             document.getElementById("messageDiv").append(message)
+
         }
+        //#endregion
+       //#region Hub | connection.on
+       
+        connection.on("ReceiveMessage", function (data) {
+            //  MessageType.Text, 0 | MessageType.File, 1 |MessageType.Image,2 | MessageType.Gif   3
+            console.log("ReceiveMessage");
+            console.log(data);
+            if (data.type == 0) { printMessage(data); }
+            else if (data.type == 1) { printFile(data);}
+            else if (data.type == 2) { printImage(data);}
+            else if (data.type == 3) { printGif(data)}
+            
+            }
+        );
 
         connection.on("UserJoinedChannel", function (data)
         {
@@ -258,24 +274,16 @@
             var ele = document.getElementById("onlineList");
             ele.appendChild(divElement);
 
-
               document.getElementById("messageDiv").append(message)
                 var element = document.getElementsByClassName("offline");
-
-
-
-
             });
-
         connection.on("UpdateUsersOnline", function (data) {
             console.log("UpdateUsersOnline");
 
             document.getElementsByClassName("user")
                 data.forEach(element => addProfile(element));
         });
-
         //#endregion
-
        //#region axios | post
            // join channel
         var joinChannel = function () {
@@ -308,6 +316,7 @@
                     })
         }
         var sendGif = function (data) {
+
             console.log("sendGif");
 
             var formData = new FormData();
@@ -322,6 +331,7 @@
             }).then(res => {
                 console.log("Gif Sent!")
                 hideGifInputElements();
+               
             }).catch(err => { console.log(err) })
 
 
@@ -419,12 +429,15 @@
 }
 
         // HIDE GIF input elements
-        var hideGifInputElements = function () {
+        var hideGifInputElements = function ()
+        {
         console.log("hideGifInputElements");
         var middleContainer = document.getElementsByClassName("flexbox-item flexbox-item-2")[0];
-        console.log(middleContainer);
+            console.log(middleContainer);
+
         var gifInputForm = document.getElementsByClassName("chat-input")[0];
-        console.log(gifInputForm);
+            console.log(gifInputForm);
+
         middleContainer.replaceChild(chatInputForm, gifInputForm);
             var msgeDiv = document.getElementById("messageDiv");
             msgeDiv.innerHTML = "";
@@ -472,6 +485,7 @@
             
 
         }
+
         // DISPLAY GiF input elements
         var displayGifInputElements = function () {
 
@@ -485,6 +499,12 @@
         var button = document.createElement("button");
         button.id = "giphyButton#";
         button.innerText = "Giphy";
+        // <form id="inputsendmessage" class="chat-input" onsubmit="sendMessage(event)" asp-controller="Chat" asp-action="CreateMessage">
+        //    var form = document.createElement("form");
+        //    form.classList.add("chat-input");
+        //    form.id = "inputsendGif";
+        //    form.onsubmit = sendGif(event);
+           // form.asp-action
         button.onclick = function () {
 
         console.log("Looking up Gifs for entered keyword : " + chatinput.value);
@@ -543,7 +563,8 @@
             image.value = url;
 
             var form = document.createElement("form");
-
+            
+             // <form id="inputsendmessage" class="chat-input" onsubmit="sendMessage(event)" asp-controller="Chat" asp-action="CreateMessage">
             var hiddenInputChatId = document.createElement("input");
             hiddenInputChatId.type = "hidden";
             hiddenInputChatId.class = "gif-input";
@@ -568,6 +589,7 @@
                     gifUrl: url
                 }
                 sendGif(data);
+
 
 
             });

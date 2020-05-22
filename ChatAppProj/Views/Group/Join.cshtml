@@ -12,7 +12,7 @@
             @foreach (var channel in Model.Channels)
             {
                 <div class="channelText">
-                    <form asp-action="JoinChannel" asp-controller="Channel" asp-route-channelId="@channel.Id" asp-route-connectionId="">
+                    <form asp-action="Join" asp-controller="Channel" asp-route-channelId="@channel.Id" asp-route-connectionId="">
                         <button type="submit"><span>@channel.Name</span></button>
                     </form>
 
@@ -21,7 +21,7 @@
             @if (User.FindFirst(ClaimTypes.NameIdentifier).Value == Model.ProfileId)
             {
                 <div class="channelText">
-                    <form asp-route-groupId="@Model.Id" asp-action="CreateGet" asp-controller="Channel">
+                    <form asp-route-groupId="@Model.Id" asp-action="Create" asp-controller="Channel">
                         <button type="submit"><span>Add Channel +</span></button>
                     </form>
 

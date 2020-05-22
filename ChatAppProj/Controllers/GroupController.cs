@@ -72,22 +72,7 @@ namespace ChatApp.Controllers
             var allmessages = _chatService.GetAllMessages();
             return View(group);
         }
-        /*
-         * 
-           // _chatService.SaveChangesAsync();
 
-             var group = _chatService.GetAllGroups()
-                .Where(g => g.Id == groupId)
-                .FirstOrDefault();
-
-            var channels = _chatService.GetAllChannels()                 
-                 .Where(c => c.GroupId == groupId);  
-
-            group.Channels = channels.ToList();
-           // 
-           // var currentUserId = this._signInManager.UserManager.GetUserId(HttpContext.User);
-            
-         */
         public IActionResult Create()
         {
             CreateGroupModel model = new CreateGroupModel();
