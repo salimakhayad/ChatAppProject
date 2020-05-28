@@ -4,9 +4,9 @@
   
     <div class="flexbox-container">
         <div class="flexbox-item flexbox-item-1">
-
             <div class="title">
-                <span>@Model.Name</span>
+                <img width="250" height="250" src="@String.Format("data:image/gif;base64,{0}", Convert.ToBase64String(@Model.Photo))" />
+                <span class="neon">@Model.Name</span>
             </div>
 
             @foreach (var channel in Model.Channels)

@@ -130,23 +130,21 @@ namespace ChatApp.Controllers
             
             foreach (var user in usersCurrentlyOnline)
             {
-                //if (profile.Id != user.ProfileId)
-                //{
+                if (profile.Id != user.ProfileId)
+                {
                     sortedUserList.Add(
                     new ProfileChatModel()
                     {
                         ProfileName = user.ProfileName,
                         ProfileId = user.ProfileId
                     });
-                //}
-                
-                
+                }
             }
-           
+            
             await _chat.Clients.Group(channelId).
             SendAsync("UpdateUsersOnline", sortedUserList)
             ;
-
+            
 
             return Ok();
         }
@@ -155,7 +153,7 @@ namespace ChatApp.Controllers
         {
             await _chat.Groups.RemoveFromGroupAsync(connectionId, channelId);
             return Ok();
-        }
+        } 
         // axios.post('/Chat/SendMessage', data)
         [HttpPost("[action]")]
         public async Task<ActionResult> SendMessage(
@@ -169,7 +167,7 @@ namespace ChatApp.Controllers
             {
                 Chat = chat,
                 ChatId = chatId,
-                Text = message,
+                Text = message??" ",
                 ProfileName = User.Identity.Name,
                 Timestamp = DateTime.Now,
                 Type = MessageType.Text

@@ -58,8 +58,19 @@ namespace ChatApp.Controllers
 
             model.OwnerId = currentGroup.ProfileId;
 
+            var udsd = _chatService.GetAllGroupProfiles();
+            var usersIdsInGroup = _chatService.GetAllGroupProfiles().Where(g => g.GroupId == currentGroup.Id).Select(g=>g.ProfileId).ToList();
+          
 
-
+            var users = _chatService.GetAllProfiles();
+            var filteredUsersInGroup = new List<Profile>();
+            foreach (var user in users)
+            {
+                if (usersIdsInGroup.Contains(user.Id))
+                {
+                    filteredUsersInGroup.Add(user);
+                }
+            }
             foreach (var channel in channels)
             {
                 var sChannel = _chatService.GetAllChannels()
@@ -73,17 +84,17 @@ namespace ChatApp.Controllers
                 var messages = _chatService.GetAllMessages()
                .Where(mes => mes.ChatId == sChat.Id );
 
-                var channelProfiles = _chatService.GetAllChannelProfiles()
-                    .Where(cp=>cp.ChannelId==channel.Id);
+                //var channelProfiles = _chatService.GetAllChannelProfiles()
+                //    .Where(cp=>cp.ChannelId==channel.Id);
 
                 sChat.Messages = messages.ToList();
                 var profiles = new List<Profile>();
-                foreach (var prof in channelProfiles)
-                {
-                    var profFromDb = _chatService.GetAllProfiles().Where(p => p.Id == prof.ProfileId).FirstOrDefault();
-                    profiles.Add(profFromDb);
-               
-                }
+                //foreach (var prof in channelProfiles)
+                //{
+                //    var profFromDb = _chatService.GetAllProfiles().Where(p => p.Id == prof.ProfileId).FirstOrDefault();
+                //    profiles.Add(profFromDb);
+                //
+                //}
                 sChat.Profiles = profiles.ToList();
                 if (channel.Id == selectedChannel.Id)
                 {
@@ -101,6 +112,7 @@ namespace ChatApp.Controllers
             model.ProfileId = profile.Id;
             model.SelectedChannel = selectedChannel;
             model.Id = currentGroup.Id;
+            model.Profiles = filteredUsersInGroup;
         
             return View("Views/Group/ChannelSelected.cshtml", model);
         }

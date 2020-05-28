@@ -16,7 +16,6 @@ namespace ChatApp.Data
         public DbSet<Group> Groups { get; set; }
         public DbSet<Channel> Channels { get; set; }
         public DbSet<Chat> Chats { get; set; }
-        public DbSet<ChannelProfile> ChannelProfiles { get; set; }
         public DbSet<GroupProfile> GroupProfiles { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<TimeRegistration> TimeRegistrations { get; set; }
@@ -31,9 +30,6 @@ namespace ChatApp.Data
                 foreignKey.DeleteBehavior = DeleteBehavior.Restrict;
             }
    
-            modelBuilder.Entity<ChannelProfile>()
-                .HasKey(x => new { x.ChannelId, x.ProfileId });
-
             modelBuilder.Entity<GroupProfile>()
              .HasKey(x => new { x.GroupId, x.ProfileId });
 

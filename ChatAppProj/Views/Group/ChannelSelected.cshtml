@@ -69,11 +69,20 @@
     </div>
     <!--Users in channel-->
     <div class="flexbox-item flexbox-item-3">
-        <div class="online">
-            <span id="onlineList">Online</span>
+        <div id="onlineList" class="online">
+            <span >Online</span>
         </div>
-        <div class="offline">
-            <span id="offlineList">Offline</span>
+        <div id="offlineList" class="offline">
+            <span >Offline</span>
+            @foreach (var profile in Model.Profiles)
+            {
+                    <div class="user" id="@profile.Id">
+                        <span>@profile.UserName
+                             @if (Model.OwnerId== profile.Id)
+                             {@Html.Raw(" (owner)")}
+                        </span>
+                    </div>
+        }
         </div>
 
 
@@ -97,11 +106,15 @@
 
        // #region onload
         window.onload = function () {
+
+
             displayCurrentUserOnline();
-             // make input element visible
+
+
+             // make input element visible and set scroll bottom
              document.getElementById("inputsendmessage").style="block";
              var element = document.getElementById("messageDiv");
-            element.scrollTop = element.scrollHeight;
+             element.scrollTop = element.scrollHeight;
 
              }
          //#endregion
@@ -146,7 +159,7 @@
             });
         });
         // #endregion
-        //#region printFunctions
+       //#region printFunctions
         var printFile = function (data) {
             console.log("printFile not implemented yet");
         }
@@ -217,26 +230,30 @@
 
         connection.on("UserJoinedChannel", function (data)
         {
-             console.log("UserJoinedChannel");
-            //msg in chat
+            console.log("UserJoinedChannel");
+            //post user has joined. msg in chat
             var message = document.createElement("div");
             message.classList.add("message");
-
             var header = document.createElement("header");
             header.appendChild(document.createTextNode(data.name));
-
             var p = document.createElement("p");
             p.appendChild(document.createTextNode(data.text));
-
             var small = document.createElement("small");
             var text = data.timestamp;
             small.appendChild(document.createTextNode(text));
-
             message.appendChild(header);
             message.appendChild(p);
             message.appendChild(small);
 
-             document.getElementById("messageDiv").append(message)
+
+            document.getElementById("messageDiv").append(message)
+
+            var user = {
+                profileId: data.profileId,
+                profileName: data.name
+            }
+
+            setUserOnline(user);
 
 
 
@@ -248,6 +265,8 @@
             // log data
             console.log("data", data);
 
+            //set useroffline
+            //setUserOffline(data);
             // create user left message
 
             var message = document.createElement("div");
@@ -256,38 +275,75 @@
             var header = document.createElement("header");
             header.appendChild(document.createTextNode("server"));
 
-                var p = document.createElement("p");
-                p.appendChild(document.createTextNode(data.profileName + " went offline. "));
-
-
+            var p = document.createElement("p");
+            p.appendChild(document.createTextNode(data.profileName + " has left the channel. "));
 
             message.appendChild(header);
             message.appendChild(p);
 
+            console.log(data.profileName);
+            console.log(data.profileId);
 
+            document.getElementById("messageDiv").append(message);
+            var user = {
+                profileId:data.profileId,
+                profileName:data.profileName
+            }
+            setUserOffline(user);
 
-                console.log(data.profileId);
-            // remove from online list and put into offline
-                document.getElementById(data.profileId).remove();
-                console.log("remove from online list");
-
-            var ele = document.getElementById("onlineList");
-            ele.appendChild(divElement);
-
-              document.getElementById("messageDiv").append(message)
-                var element = document.getElementsByClassName("offline");
             });
         connection.on("UpdateUsersOnline", function (data) {
             console.log("UpdateUsersOnline");
-
-            document.getElementsByClassName("user")
-                data.forEach(element => addProfile(element));
+            console.log(data);
+            data.forEach(element => setUserOnline(element));
         });
         //#endregion
+
+
+        // setUserOnline
+        var setUserOnline = function (data) {
+
+            console.log("setUserOnline");
+            if (data.profileId != undefined) {
+                console.log(data);
+
+                var userElement = document.getElementById(data.profileId);
+                console.log(data.profileId);
+
+                var offlineList = document.getElementById("offlineList");
+                var onlineList = document.getElementById("onlineList");
+                // check if its a newly joined user
+                if (userElement != undefined) {
+                    console.log(userElement);
+                    console.log(offlineList);
+                    console.log(onlineList);
+                    //offlineList.removeChild(userElement);
+                    onlineList.appendChild(userElement);
+                    console.log(offlineList);
+                    console.log(onlineList);
+
+                } else {
+                    // newly joined user went online
+                    var newUserElement = document.createElement("div");
+                    newUserElement.classList.add("user");
+                    newUserElement.id = data.profileId;
+                    var innerSpanElement = document.createElement("span");
+                    innerSpanElement.innerHTML = data.profileName;
+                    newUserElement.appendChild(innerSpanElement);
+                    onlineList.appendChild(newUserElement);
+                }
+            }
+            else
+            {
+                console.log("invalid data went through setUserOnline()");
+            }
+            
+        }
+
        //#region axios | post
 
         var joinChannel = function () {
-        var url = "/Chat/JoinChannel/" + _connectionId + "/@Model.Id"
+            var url = "/Chat/JoinChannel/" + _connectionId + "/@Model.Id"
         axios.post(url, null)
             .then(res => {
                     console.log("Channel Joined!", res);
@@ -343,23 +399,17 @@
 
        //#region  -Model functions
         var displayCurrentUserOnline = function () {
+            console.log("displayCurrentUserOnline");
 
-                  var divElement = document.createElement("div");
-                  var spanElement = document.createElement("span");
-                  spanElement.innerText = username;
-                  divElement.id = profileIdentifier;
-                  if ("@Model.OwnerId" == profileIdentifier) {
-                      spanElement.innerText += " (owner) ";
-                  }
+            var user = {
+                profileId: profileIdentifier,
+                profileName : username
+            }
 
-                  divElement.appendChild(spanElement);
-                  divElement.classList.add("user");
-                  var ele = document.getElementById("onlineList");
-                  ele.appendChild(divElement);
+            setUserOnline(user);
 
         }
        //#endregion
-
 
         // CLEAR messages
         var clearMessagesDiv = function () {
@@ -429,7 +479,8 @@
             var header = document.createElement("header");
             header.innerHTML = profileName;
             divElement.appendChild(header);
-            if (messageType == "Text") {
+            if (messageType == "Text")
+            {
              var p = document.createElement("p");
              p.innerHTML = messageText;
              divElement.appendChild(p);
@@ -538,23 +589,24 @@
                      sendGif(data);
                  });
 
-          
+
 
                  var messagesNode = document.getElementById("messageDiv");
                  messagesNode.appendChild(image);
              }
 
          }
-}
-         // ADD PROFILE
-        var addProfile = function (data) {
-        if ("@Model.ProfileId" != data.profileId) {
-        console.log("addProfile");
+        }
+         // setUserOffline
+        var setUserOffline = function (data)
+        {
+            console.log("setUserOffline");
+            var profileElement = document.getElementById(data.profileId);
+            var onlineList = document.getElementById("onlineList");
+            onlineList.removeChild(profileElement);
 
-        console.log(data.profileId);
-        console.log(data.profileName);
-        var element = document.getElementsByClassName("flexbox-item flexbox-item-3");
         var divElement = document.createElement("div");
+
         var spanElement = document.createElement("span");
         spanElement.innerText = data.profileName;
         divElement.id = data.profileId;
@@ -564,17 +616,16 @@
 
         divElement.appendChild(spanElement);
         divElement.classList.add("user");
-        var ele = document.getElementById("onlineList");
-        ele.appendChild(divElement);
-
-    }
+        var offlineList = document.getElementById("offlineList");
+            offlineList.appendChild(divElement);
 
 
 
-}
+
+        }
 
 
     </script>
-
+        
 }
 

@@ -12,7 +12,7 @@ namespace ChatApp.Domain
         public Group()
         {
             Channels = new List<Channel>();
-            ChannelProfiles = new List<ChannelProfile>();
+            GroupProfiles = new List<GroupProfile>();
         }
     
         public int Id { get; set; }
@@ -23,7 +23,7 @@ namespace ChatApp.Domain
         public string Content { get; set; }
         public byte[] Photo { get; set; }
         public virtual ICollection<Channel> Channels { get; set; }
-        public virtual ICollection<ChannelProfile> ChannelProfiles { get; set; }
+        public virtual ICollection<GroupProfile> GroupProfiles { get; set; }
 
 
 

@@ -40,14 +40,7 @@ namespace ChatApp.Data
             }
         }
 
-        public void DeleteChannelProfile(int Id)
-        {
-            var channelProfile = _context.ChannelProfiles.Where(c => c.ProfileId == Id.ToString()).FirstOrDefault();
-            if (channelProfile != null)
-            {
-                _context.ChannelProfiles.Remove(channelProfile);
-            }
-        }
+   
         public void DeleteGroupById(int Id)
         {
             var group = _context.Groups.Where(group => group.Id == Id).FirstOrDefault();
@@ -55,12 +48,6 @@ namespace ChatApp.Data
             {
                 _context.Groups.Remove(group);
             }
-        }
-        public void DeleteChatProfileById(int Id)
-        {
-            var chatprofile = _context.ChannelProfiles.Where(x => x.ChannelId == Id).FirstOrDefault();
-            _context.ChannelProfiles.Remove(chatprofile);
-            _context.SaveChanges();
         }
 
         public void DeleteMessageById(int Id)
@@ -71,7 +58,14 @@ namespace ChatApp.Data
                 _context.Messages.Remove(message);
             }
         }
-
+        public void DeleteGroupProfile(int id)
+        {
+            var gp = _context.GroupProfiles.Where(g => g.Id == id).FirstOrDefault();
+            if (gp != null)
+            {
+                _context.GroupProfiles.Remove(gp);
+            }
+        }
         public void DeleteProfileById(int Id)
         {
             var Profile = _context.Profiles.Where(msg => msg.Id == Id.ToString()).FirstOrDefault();
@@ -111,9 +105,9 @@ namespace ChatApp.Data
         {
             return _context.Channels;
         }
-        public IEnumerable<ChannelProfile> GetAllChannelProfiles()
+        public IEnumerable<GroupProfile> GetAllGroupProfiles()
         {
-            return _context.ChannelProfiles;
+            return _context.GroupProfiles;
         }
         public void InsertTimeRegistration(TimeRegistration tr)
         {
@@ -142,6 +136,12 @@ namespace ChatApp.Data
         {
             _context.Channels.Add(channel);
         }
+
+        public void InsertGroupProfile(GroupProfile groupProfile)
+        {
+            _context.GroupProfiles.Add(groupProfile);
+            _context.SaveChanges();
+        }
         public async Task SaveChangesAsync()
         {
            await _context.SaveChangesAsync();
@@ -152,18 +152,6 @@ namespace ChatApp.Data
             _context.SaveChanges();
         }
 
-        public IEnumerable<ChannelProfile> GetAllChannelProfiles(int channelId)
-        {
-            return _context.ChannelProfiles;
-        }
-
-
-
-        public void InsertChannelProfile(ChannelProfile channelProfile)
-        {
-            _context.ChannelProfiles.Add(channelProfile);
-            _context.SaveChanges();
-        }
 
 
     }

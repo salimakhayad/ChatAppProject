@@ -44,7 +44,7 @@ namespace ChatApp.Controllers
         }
         public IActionResult Join(int groupId)
         {
-           
+
             var profileId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
             var profile = _chatService.GetAllProfiles().Where(x => x.Id == profileId).FirstOrDefault();
 
@@ -52,24 +52,37 @@ namespace ChatApp.Controllers
             var channels = _chatService.GetAllChannels()
                   .Where(c => c.GroupId == group.Id);
 
-            foreach (var channel in channels)
-            {
-                var selectedChannel = _chatService.GetAllChannels()
-                 .Where(c => c.Id == channel.Id)
+         var userIsAlrdyInGroup = _chatService.GetAllGroupProfiles().Where(g => g.GroupId == group.Id && g.ProfileId == profileId).Any();
+         if (!userIsAlrdyInGroup)
+         {
+             var userGroup = new GroupProfile()
+             {
+                 GroupId = group.Id,
+                 ProfileId = profileId,
+                 Role = RoleProfile.Member
+             };
+             _chatService.InsertGroupProfile(userGroup);
+             _chatService.SaveChanges();
+         }
+          // var usersInGroup = _chatService.GetAllGroupProfiles().Where(g => g.GroupId == group.Id).Select(x => x.Profile);
+             foreach (var channel in channels)
+             {
+                 var selectedChannel = _chatService.GetAllChannels()
+                  .Where(c => c.Id == channel.Id)
+                  .FirstOrDefault();
+             
+                 var selectedChat = _chatService.GetAllChats()
+                 .Where(chat => chat.ChannelId == selectedChannel.Id)
                  .FirstOrDefault();
-
-                var selectedChat = _chatService.GetAllChats()
-                .Where(chat => chat.ChannelId == selectedChannel.Id)
-                .FirstOrDefault();
-
-                var messages = _chatService.GetAllMessages()
-               .Where(mes => mes.ChatId == selectedChat.Id);
-
-
-                selectedChat.Messages = messages.ToList();
-                selectedChannel.Chat = selectedChat;
-            }
-            var allmessages = _chatService.GetAllMessages();
+             
+                 var messages = _chatService.GetAllMessages()
+                .Where(mes => mes.ChatId == selectedChat.Id);
+             
+             
+                 selectedChat.Messages = messages.ToList();
+                 selectedChannel.Chat = selectedChat;
+             }
+           
             return View(group);
         }
 
@@ -95,7 +108,7 @@ namespace ChatApp.Controllers
                 Profile = _currentProfile,
                 ProfileId = _currentProfile.Id,
                 Content = model.Content,                
-                ChannelProfiles = new List<ChannelProfile>(),
+                GroupProfiles = new List<GroupProfile>(),
                 Channels = new List<Channel>()
             };
 
