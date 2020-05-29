@@ -30,42 +30,48 @@
             {
                 <div class="message">
                     <header>@message.ProfileName</header>
-                       @if (message.Type == MessageType.Text)
-                       {
-                           <p>@message.Text</p>
-                       }
-                       else if (message.Type == MessageType.Gif || message.Type == MessageType.Image)
-                       {
-                           <img src="@message.Text" width="150" height="150" />
-                       }else if (message.Type == MessageType.File)
-                       {
-                           <img src="@message.Text" />
-                       }
-                      <small>@message.Timestamp.ToShortTimeString()</small>
-                 </div>
+                    @if (message.Type == MessageType.Text)
+                    {
+                        <p>@message.Text</p>
+                    }
+                    else if (message.Type == MessageType.Gif)
+                    {
+                        <img src="@message.Text" width="150" height="150" />
+                    }
+                    else if (message.Type == MessageType.Image)
+                    {
+                    <img src="@String.Format("data:image/gif;base64,{0}", Convert.ToBase64String(message.File))" width="150" height="150" />
+                    }
+                    else if (message.Type == MessageType.File)
+                    {
+                        <img src="@message.Text" />
+                    }
+                    <small>@message.Timestamp.ToShortTimeString()</small>
+                </div>
             }
         </div>
-        <!--user input-->
-        <form id="inputsendmessage" class="chat-input" onsubmit="sendMessage(event)" asp-controller="Chat" asp-action="CreateMessage">
-            <input type="hidden" name="chatId" value="@Model.SelectedChannel.Chat.Id" />
-            <!--File upload-->
-            <label for="file-upload" class="custom-file-upload">
-                <img src="~/icons/upload-files-icon.png" alt="upload-files-icon" />
-                <input type="file" id="file-input" />
-            </label>
-            <input id="file-upload" type="file" />
+       
+            <!--user input-->
+            <form id="inputsendmessage" class="chat-input" onsubmit="sendMessage(event)" asp-controller="Chat" asp-action="CreateMessage">
+                <input type="hidden" name="chatId" value="@Model.SelectedChannel.Chat.Id" />
+                <!--File upload-->
+                <label for="file-upload" class="custom-file-upload">
+                    <img src="~/icons/upload-files-icon.png" alt="upload-files-icon" />
+                    <input type="file" id="file-input"  />
+                </label>
+                <input id="file-upload" type="file" />
 
-            <!--Text-->
-            <input type="text" name="message" id="user-input" autofocus />
+                <!--Text-->
+                <input type="text" name="message" id="user-input" autofocus />
 
-            <!--Gif-->
-            <a id="UseGifs" class="gifIcon">
-                <img src="~/icons/gif-icon.png" id="gifImg" alt="gif-icon" />
-            </a>
+                <!--Gif-->
+                <a id="UseGifs" class="gifIcon">
+                    <img src="~/icons/gif-icon.png" id="gifImg" alt="gif-icon" />
+                </a>
 
 
 
-        </form>
+            </form>
     </div>
     <!--Users in channel-->
     <div class="flexbox-item flexbox-item-3">
@@ -82,7 +88,7 @@
                              {@Html.Raw(" (owner)")}
                         </span>
                     </div>
-        }
+            }
         </div>
 
 
@@ -107,16 +113,22 @@
        // #region onload
         window.onload = function () {
 
-
             displayCurrentUserOnline();
+            makeInputElementVisibleAndScrollChatToBottom();
 
-
-             // make input element visible and set scroll bottom
-             document.getElementById("inputsendmessage").style="block";
-             var element = document.getElementById("messageDiv");
-             element.scrollTop = element.scrollHeight;
-
-             }
+        }
+        var makeInputElementVisibleAndScrollChatToBottom = function ()
+        {
+            // make input element visible and set scroll bottom
+            document.getElementById("inputsendmessage").style = "block";
+            document.getElementById("inputsendimage").style = "block";
+            scrollChatToBottom();
+        }
+        var scrollChatToBottom = function ()
+        {
+            var element = document.getElementById("messageDiv");
+            element.scrollTop = element.scrollHeight;
+        }
          //#endregion
 
        //#region connection
@@ -158,14 +170,59 @@
                 clearMessagesDiv();
             });
         });
+
+        $('input[type=file]').change(function (e)
+        {
+            var chatId = "@Html.Raw(Model.SelectedChannel.Chat.Id)";
+            var file = e.target.files[0];
+            var formData = new FormData();
+            formData.set('file', file);
+            formData.set("chatId", chatId);
+
+            axios({
+                method: "post",
+                url: "/Chat/SendImage",
+                data: formData,
+                headers: { "Content-type": "multipart/form-data" }
+            }).then(res => {
+                console.log("file Sent!")
+
+
+            }).catch(err => { console.log(err) })
+
+        }
+        )
         // #endregion
+        
        //#region printFunctions
         var printFile = function (data) {
             console.log("printFile not implemented yet");
         }
         var printImage = function (data) {
 
-            console.log("printImage not implemented yet");
+            console.log("printImage");
+            var message = document.createElement("div");
+            message.classList.add("message");
+
+            var header = document.createElement("header");
+            header.appendChild(document.createTextNode(data.name));
+
+            var img = document.createElement("img");
+
+            img.src = data.src;
+            img.width = 150;
+            img.height = 150;
+
+
+            var small = document.createElement("small");
+            var text = data.timestamp;
+            small.appendChild(document.createTextNode(text));
+
+            message.appendChild(header);
+            message.appendChild(img);
+            message.appendChild(small);
+
+            document.getElementById("messageDiv").append(message)
         }
         var printMessage = function (data) {
             console.log("printMessage");
@@ -223,11 +280,11 @@
             if (data.type == 0) { printMessage(data); }
             else if (data.type == 1) { printFile(data);}
             else if (data.type == 2) { printImage(data);}
-            else if (data.type == 3) { printGif(data)}
+            else if (data.type == 3) { printGif(data) }
 
+            scrollChatToBottom();
             }
         );
-
         connection.on("UserJoinedChannel", function (data)
         {
             console.log("UserJoinedChannel");
@@ -258,7 +315,6 @@
 
 
             });
-
         connection.on("UserLeftChannel", function (data) {
 
         console.log("UserLeftChannel");
@@ -298,8 +354,6 @@
             data.forEach(element => setUserOnline(element));
         });
         //#endregion
-
-
         // setUserOnline
         var setUserOnline = function (data) {
 
@@ -317,7 +371,6 @@
                     console.log(userElement);
                     console.log(offlineList);
                     console.log(onlineList);
-                    //offlineList.removeChild(userElement);
                     onlineList.appendChild(userElement);
                     console.log(offlineList);
                     console.log(onlineList);
@@ -337,11 +390,9 @@
             {
                 console.log("invalid data went through setUserOnline()");
             }
-            
+
         }
-
        //#region axios | post
-
         var joinChannel = function () {
             var url = "/Chat/JoinChannel/" + _connectionId + "/@Model.Id"
         axios.post(url, null)
@@ -372,10 +423,8 @@
                     })
         }
         var sendGif = function (data) {
-
             swapGifInputWithChatInput();
             console.log("sendGif");
-
             var formData = new FormData();
             formData.set("chatId", data.chatId);
             formData.set("gifUrl", data.gifUrl);
@@ -394,7 +443,31 @@
 
 
 
-            }
+        }
+        var sendImage = function (data) {
+
+
+            console.log("sendImage");
+            console.log(data);
+           // var formData = new FormData();
+           // formData.set("chatId", data.chatId);
+           // formData.set("file", data.file);
+           //
+           // axios({
+           //     method: "post",
+           //     url: "/Chat/SendGif",
+           //     data: formData,
+           //     headers: { "Content-type": "multipart/form-data" }
+           // }).then(res => {
+           //     console.log("Gif Sent!")
+           //
+           //
+           // }).catch(err => { console.log(err) })
+
+
+
+
+        }
         //#endregion
 
        //#region  -Model functions
@@ -417,12 +490,6 @@
     var messagesNode = document.getElementById("messageDiv");
     messagesNode.innerHTML = "";
 }
-
-        var displayMessages = function()
-        {
-            clearMessagesDiv();
-
-        }
 
         // HIDE CHAT input elements
         var hideChatInputElements = function () {
