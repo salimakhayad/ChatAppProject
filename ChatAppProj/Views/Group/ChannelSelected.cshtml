@@ -1,4 +1,5 @@
 ﻿@model ChannelSelectedViewModel
+@using Newtonsoft.Json;
 @using System.Security.Claims;
 @using ChatApp.Models.Group;
 @using ChatApp.Domain;
@@ -40,7 +41,7 @@
                     }
                     else if (message.Type == MessageType.Image)
                     {
-                    <img src="@String.Format("data:image/gif;base64,{0}", Convert.ToBase64String(message.File))" width="150" height="150" />
+                        <img src="@String.Format("data:image/gif;base64,{0}", Convert.ToBase64String(message.File))" width="150" height="150" />
                     }
                     else if (message.Type == MessageType.File)
                     {
@@ -50,47 +51,60 @@
                 </div>
             }
         </div>
-       
-            <!--user input-->
-            <form id="inputsendmessage" class="chat-input" onsubmit="sendMessage(event)" asp-controller="Chat" asp-action="CreateMessage">
-                <input type="hidden" name="chatId" value="@Model.SelectedChannel.Chat.Id" />
-                <!--File upload-->
-                <label for="file-upload" class="custom-file-upload">
-                    <img src="~/icons/upload-files-icon.png" alt="upload-files-icon" />
-                    <input type="file" id="file-input"  />
-                </label>
-                <input id="file-upload" type="file" />
 
-                <!--Text-->
-                <input type="text" name="message" id="user-input" autofocus />
+        <!--user input-->
+        <form id="inputsendmessage" class="chat-input" onsubmit="sendMessage(event)" asp-controller="Chat" asp-action="CreateMessage">
+            <input type="hidden" name="chatId" value="@Model.SelectedChannel.Chat.Id" />
+            <!--File upload-->
+            <label for="file-upload" class="custom-file-upload">
+                <img src="~/icons/upload-files-icon.png" alt="upload-files-icon" />
+                <input type="file" id="file-input" />
+            </label>
+            <input id="file-upload" type="file" />
 
-                <!--Gif-->
-                <a id="UseGifs" class="gifIcon">
-                    <img src="~/icons/gif-icon.png" id="gifImg" alt="gif-icon" />
-                </a>
+            <!--Text-->
+            <input type="text" name="message" id="user-input" autofocus />
+
+            <!--Gif-->
+            <a id="UseGifs" class="gifIcon">
+                <img src="~/icons/gif-icon.png" id="gifImg" alt="gif-icon" />
+            </a>
 
 
 
-            </form>
+        </form>
     </div>
     <!--Users in channel-->
     <div class="flexbox-item flexbox-item-3">
         <div id="onlineList" class="online">
-            <span >Online</span>
+            <span>Actief</span>
         </div>
         <div id="offlineList" class="offline">
-            <span >Offline</span>
-            @foreach (var profile in Model.Profiles)
+            <span>Niet-Actief</span>
+            @foreach (var profile in Model.ProfilesInside)
             {
-                    <div class="user" id="@profile.Id">
-                        <span>@profile.UserName
-                             @if (Model.OwnerId== profile.Id)
-                             {@Html.Raw(" (owner)")}
-                        </span>
-                    </div>
+                <div class="user" id="@profile.Id">
+                    <span>
+                        @profile.UserName
+                    @if (Model.OwnerId == profile.Id)
+                    {@Html.Raw(" (owner)")}
+                </span>
+            </div>
+        }
+        </div>
+        <div id="profileList" class="offline">
+            <span>Other Profiles</span>
+            @foreach (var profile in Model.ProfilesOutside)
+            {
+                <div class="user" id="@profile.Id">
+                    <span>
+                        @profile.UserName
+                        @if (Model.OwnerId == profile.Id)
+                        {@Html.Raw(" (owner)")}
+                    </span>
+                </div>
             }
         </div>
-
 
 
     </div>
@@ -108,24 +122,25 @@
 
         var username = "@Html.Raw(Model.Profile.UserName)";
         var profileIdentifier = "@Html.Raw(Model.Profile.Id)";
+        var ownerProfileId = "@Html.Raw(Model.OwnerId)";
         // #endregion
 
        // #region onload
         window.onload = function () {
-
-            displayCurrentUserOnline();
-            makeInputElementVisibleAndScrollChatToBottom();
+            console.log("window.onload");
+            //displayCurrentUserOnline();
+            makeInputElementVisible();
+            scrollChatToBottom();
 
         }
-        var makeInputElementVisibleAndScrollChatToBottom = function ()
+        var makeInputElementVisible = function ()
         {
-            // make input element visible and set scroll bottom
+            console.log("makeInputElementVisible");
             document.getElementById("inputsendmessage").style = "block";
-            document.getElementById("inputsendimage").style = "block";
-            scrollChatToBottom();
         }
         var scrollChatToBottom = function ()
         {
+            console.log("scrollChatToBottom");
             var element = document.getElementById("messageDiv");
             element.scrollTop = element.scrollHeight;
         }
@@ -165,14 +180,17 @@
        // #region jquery
         $(function () {
             $("#UseGifs").on("click", function () {
-                console.log("inside click on gif event");
+                console.log("#UseGifs click");
                 displayGifInputElements();
                 clearMessagesDiv();
             });
         });
 
+        // file selected event
         $('input[type=file]').change(function (e)
         {
+            console.log("Image selected");
+
             var chatId = "@Html.Raw(Model.SelectedChannel.Chat.Id)";
             var file = e.target.files[0];
             var formData = new FormData();
@@ -193,10 +211,10 @@
         }
         )
         // #endregion
-        
+
        //#region printFunctions
         var printFile = function (data) {
-            console.log("printFile not implemented yet");
+            console.log("printFile not implemented");
         }
         var printImage = function (data) {
 
@@ -225,7 +243,10 @@
             document.getElementById("messageDiv").append(message)
         }
         var printMessage = function (data) {
+
+           
             console.log("printMessage");
+
             var message = document.createElement("div");
             message.classList.add("message");
 
@@ -276,7 +297,7 @@
         connection.on("ReceiveMessage", function (data) {
             //  MessageType.Text, 0 | MessageType.File, 1 |MessageType.Image,2 | MessageType.Gif   3
             console.log("ReceiveMessage");
-            console.log(data);
+
             if (data.type == 0) { printMessage(data); }
             else if (data.type == 1) { printFile(data);}
             else if (data.type == 2) { printImage(data);}
@@ -358,42 +379,45 @@
         var setUserOnline = function (data) {
 
             console.log("setUserOnline");
-            if (data.profileId != undefined) {
-                console.log(data);
-
+           
+          
                 var userElement = document.getElementById(data.profileId);
                 console.log(data.profileId);
 
                 var offlineList = document.getElementById("offlineList");
-                var onlineList = document.getElementById("onlineList");
+            var onlineList = document.getElementById("onlineList");
+            
                 // check if its a newly joined user
                 if (userElement != undefined) {
-                    console.log(userElement);
-                    console.log(offlineList);
-                    console.log(onlineList);
-                    onlineList.appendChild(userElement);
-                    console.log(offlineList);
-                    console.log(onlineList);
 
+                    onlineList.appendChild(userElement);
+                    offlineList.removeChild(userElement);
+            
+                    
                 } else {
                     // newly joined user went online
                     var newUserElement = document.createElement("div");
                     newUserElement.classList.add("user");
                     newUserElement.id = data.profileId;
+
                     var innerSpanElement = document.createElement("span");
                     innerSpanElement.innerHTML = data.profileName;
+                    if (ownerProfileId == data.profileId) {
+                        innerSpanElement.innerHTML += "(owner)";
+                    }
                     newUserElement.appendChild(innerSpanElement);
                     onlineList.appendChild(newUserElement);
+
+                    console.log("newly joined user went online");
+
+
                 }
-            }
-            else
-            {
-                console.log("invalid data went through setUserOnline()");
-            }
+
 
         }
        //#region axios | post
         var joinChannel = function () {
+            console.log("joinChannel");
             var url = "/Chat/JoinChannel/" + _connectionId + "/@Model.Id"
         axios.post(url, null)
             .then(res => {
@@ -423,8 +447,9 @@
                     })
         }
         var sendGif = function (data) {
-            swapGifInputWithChatInput();
             console.log("sendGif");
+            swapGifInputWithChatInput();
+           
             var formData = new FormData();
             formData.set("chatId", data.chatId);
             formData.set("gifUrl", data.gifUrl);
@@ -444,30 +469,7 @@
 
 
         }
-        var sendImage = function (data) {
 
-
-            console.log("sendImage");
-            console.log(data);
-           // var formData = new FormData();
-           // formData.set("chatId", data.chatId);
-           // formData.set("file", data.file);
-           //
-           // axios({
-           //     method: "post",
-           //     url: "/Chat/SendGif",
-           //     data: formData,
-           //     headers: { "Content-type": "multipart/form-data" }
-           // }).then(res => {
-           //     console.log("Gif Sent!")
-           //
-           //
-           // }).catch(err => { console.log(err) })
-
-
-
-
-        }
         //#endregion
 
        //#region  -Model functions
@@ -486,10 +488,10 @@
 
         // CLEAR messages
         var clearMessagesDiv = function () {
-    console.log("Clear Messages Div");
-    var messagesNode = document.getElementById("messageDiv");
-    messagesNode.innerHTML = "";
-}
+         console.log("Clear Messages Div");
+         var messagesNode = document.getElementById("messageDiv");
+         messagesNode.innerHTML = "";
+        }
 
         // HIDE CHAT input elements
         var hideChatInputElements = function () {
@@ -528,50 +530,70 @@
         middleContainer.replaceChild(chatInputForm, gifInputForm);
             var msgeDiv = document.getElementById("messageDiv");
             msgeDiv.innerHTML = "";
-            var messages = "@Html.Raw(Model.SelectedChannel.Chat.Messages)";
+
             @foreach (var message in Model.SelectedChannel.Chat.Messages)
             {
-                @:displayMessage("@message.ProfileName","@message.Type","@message.Text","@message.Timestamp");
+                if (message.Type.Equals(MessageType.Text))
+                {
+                  
+                     @:displayMessage("@message.ProfileName", "@message.Text", "@message.Timestamp", "Text");
+                }
+                else if (message.Type.Equals(MessageType.Image))
+                {
+               
+                    @:displayMessage("@message.ProfileName","@message.Text","@message.Timestamp", "Image");
+                }
+                else if (message.Type.Equals(MessageType.Gif))
+                {
+                      @:displayMessage("@message.ProfileName","@message.Text","@message.Timestamp", "Gif");
+                }
+                else if (message.Type.Equals(MessageType.File))
+                {
+                    @:displayMessage("@message.ProfileName","@message.Text","@message.Timestamp", "File");
+                }
+
             }
-            //console.log(messages);
-            console.log("replace succes");
+
         }
 
-        // DISPLAY message
-        var displayMessage = function (profileName,messageType,messageText,messageTimeStamp)
+        // // DISPLAY message
+        var displayMessage = function (profileName, messageText, messageTimeStamp,messageType)
         {
+            console.log("displayMessage");
             var msgeDiv = document.getElementById("messageDiv");
             var divElement = document.createElement("div");
             divElement.classList.add("message");
             var header = document.createElement("header");
             header.innerHTML = profileName;
             divElement.appendChild(header);
+       
             if (messageType == "Text")
             {
              var p = document.createElement("p");
-             p.innerHTML = messageText;
-             divElement.appendChild(p);
-
-            } else if (messageType == "Gif" ||"Image")
+                p.innerHTML = messageText;
+                divElement.appendChild(p);
+            }
+            else if (messageType == "Gif" || "Image")
             {
                 var img = document.createElement("img")
                 img.src = messageText;
                 img.width = 150;
                 img.height = 150;
                 divElement.appendChild(img);
-
+       
             }else if (messageType == "File")
             {
-
+       
             }
+       
+       
             var small = document.createElement("small");
-            small.innerHTML = messageTimeStamp
+            small.innerHTML = messageTimeStamp;
+       
+          
+            
             divElement.appendChild(small);
-
             msgeDiv.appendChild(divElement);
-
-
-
         }
 
         // DISPLAY GiF input elements
@@ -590,25 +612,25 @@
 
               button.onclick = function () {
 
-              console.log("Looking up Gifs for entered keyword : " + chatinput.value);
-              query = "&q=" + chatinput.value;
-              console.log(query);
-              url = api + apiKey + query;
+                      console.log("Looking up Gifs for entered keyword : " + chatinput.value);
+                      query = "&q=" + chatinput.value;
+                      console.log(query);
+                      url = api + apiKey + query;
 
-              console.log("fetched url: " + url);
-              fetch(url)
-                  .then(response => response.json())
-            .then(content => {
-                console.log(content.data);
-                console.log("META", content.data);
+                      console.log("fetched url: " + url);
+                      fetch(url)
+                          .then(response => response.json())
+                    .then(content => {
+                        console.log(content.data);
+                        console.log("META", content.data);
 
-                updateGifs(content.data);
+                        updateGifs(content.data);
 
-                this.value = "";
-            })
-            .catch(err => {
-                console.error(err);
-            });
+                        this.value = "";
+                    })
+                    .catch(err => {
+                        console.error(err);
+                    });
 
         console.log("end of onclick event");
     }
@@ -693,6 +715,6 @@
 
 
     </script>
-        
+
 }
 

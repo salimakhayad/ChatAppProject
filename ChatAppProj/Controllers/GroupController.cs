@@ -38,7 +38,7 @@ namespace ChatApp.Controllers
         public IActionResult Index()
         {
             GroupIndexModel model = new GroupIndexModel();
-            var grps = _chatService.GetAllGroups().ToList();
+            var grps = _chatService.GetAllGroups().Where(g=>g.Privacy==PrivacyType.Public).ToList();
             model.Groups = grps.ToList();
             return View(model);
         }
@@ -107,7 +107,7 @@ namespace ChatApp.Controllers
                 Name = model.Name,
                 Profile = _currentProfile,
                 ProfileId = _currentProfile.Id,
-                Content = model.Content,                
+                Content = model.Content,         
                 GroupProfiles = new List<GroupProfile>(),
                 Channels = new List<Channel>()
             };

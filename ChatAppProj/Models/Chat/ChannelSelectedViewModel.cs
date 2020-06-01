@@ -20,7 +20,8 @@ namespace ChatApp.Models.Group
         public virtual ICollection<Domain.Channel> Channels { get; set; }
         public Domain.Group Group { get; set; }
 
-        public ICollection<Domain.Profile> Profiles { get; set; }
+        public ICollection<Domain.Profile> ProfilesInside { get; set; }
+        public ICollection<Domain.Profile> ProfilesOutside { get; set; }
 
     }
 }

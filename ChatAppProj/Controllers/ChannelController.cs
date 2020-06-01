@@ -60,8 +60,7 @@ namespace ChatApp.Controllers
 
             var udsd = _chatService.GetAllGroupProfiles();
             var usersIdsInGroup = _chatService.GetAllGroupProfiles().Where(g => g.GroupId == currentGroup.Id).Select(g=>g.ProfileId).ToList();
-          
-
+            var UsersOutsideGroup = new List<Profile>();
             var users = _chatService.GetAllProfiles();
             var filteredUsersInGroup = new List<Profile>();
             foreach (var user in users)
@@ -69,6 +68,13 @@ namespace ChatApp.Controllers
                 if (usersIdsInGroup.Contains(user.Id))
                 {
                     filteredUsersInGroup.Add(user);
+                }
+            }
+            foreach (var user in users)
+            {
+                if (!usersIdsInGroup.Contains(user.Id))
+                {
+                    UsersOutsideGroup.Add(user);
                 }
             }
             foreach (var channel in channels)
@@ -112,8 +118,10 @@ namespace ChatApp.Controllers
             model.ProfileId = profile.Id;
             model.SelectedChannel = selectedChannel;
             model.Id = currentGroup.Id;
-            model.Profiles = filteredUsersInGroup;
-        
+            model.ProfilesInside = filteredUsersInGroup;
+            model.ProfilesOutside = UsersOutsideGroup;
+
+
             return View("Views/Group/ChannelSelected.cshtml", model);
         }
       

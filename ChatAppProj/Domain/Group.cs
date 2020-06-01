@@ -22,6 +22,7 @@ namespace ChatApp.Domain
         public Profile Profile { get; set; }
         public string Content { get; set; }
         public byte[] Photo { get; set; }
+        public PrivacyType Privacy { get; set; }
         public virtual ICollection<Channel> Channels { get; set; }
         public virtual ICollection<GroupProfile> GroupProfiles { get; set; }
 
