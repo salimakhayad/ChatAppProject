@@ -142,10 +142,8 @@ groupname
     color: whitesmoke;
 }
 .messages {
-    max-height:90%;
     padding-bottom: 1rem;
     overflow-y: auto;
-    margin-bottom: -50%;
 }
 .message {
     display: flex;
@@ -165,7 +163,9 @@ groupname
 .message > small {
         color: white;
 }
-    
+    .message:hover {
+        border: 1px solid lightblue;
+    }
 header {
     margin-right:5%;
 }
@@ -173,47 +173,47 @@ header {
     text-align: center;
 }
 .flexbox-container {
+    height:90vh;
+    width:100vw;
+    position:absolute;
+    left:0px;
+    margin-right:0;
+    margin-bottom:0;
+    margin-top:0;
     display: flex;
 }
 .flexbox-item {
-    width: 200px;
-   
+
+    height:90vh;
     border: 3px solid #333;
     background-color: #40444b;
 }
 .flexbox-item-1 {
     min-height: 100px;
+    width:25vw;
     
-    flex-grow: 1;
 }
 .flexbox-item-2 {
     min-height: 200px;
-    flex-grow: 2;
-    height: 70%;
-    max-height: 70%;
+    
+    width: 60vw;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    height: 70vh;
-    
 }
 .flexbox-item-3 {
-    min-height: 300px;
-    flex-shrink: 0;
+    width: 15vw;
+    
 }
     .flexbox-item-3 a {
         color: white !important;
         text-align: center !important;
-        margin-left: 30%;
     }
 
-#wrapper {
-    height: 100vh;
-    width: 100vw;
-}
+
 .channels {
-    height: 100vh;
-    width: 30vw;
+    
+
     position: absolute !important;
     top: 0px !important;
     left: 0% !important;
@@ -236,9 +236,9 @@ li.channelText {
     overflow: auto;
 }
 .chat-input {
-    position: relative;
-    top: 78%;
-    display: none;
+    position: absolute;
+    bottom: 0px;
+    width:59vw;
     background-color: #40444b;
     min-height: 70px;
     max-height: 70px;
@@ -248,10 +248,10 @@ li.channelText {
     flex-direction: row;
     padding: 1rem;
 }
-.chat-input > input {
-       
-    flex-grow: 2;
-}
+    .chat-input > input {
+        width: 59vw;
+        flex-grow: 2;
+    }
 .chat-input > button {
     flex-grow: 1;
 }
@@ -282,28 +282,51 @@ body {
 
 
 @media screen and (min-width:1321px) and (max-width:1900px) {
+
     .chat-input {
-        top: 89%;
+        position: absolute;
+        bottom:0px;
         padding-left: 0px;
-        position: sticky;
+   
     }
+
 }
 
 @media screen and (min-width:1090px) and (max-width:1321px) {
     .chat-input {
-        top: 89%;
-        padding-left: 0%;
-        position:sticky;
+        position: absolute;
+        bottom: 0px;
+        width:83%;
+    }
+    .flexbox-item-3 {
+        position:absolute;
+        right:0px;
+    }
+    .flexbox-item-2 {
+        width:85vw;
+    }
+    .flexbox-item-1 {
+        display: none;
     }
 }
-@media screen and (min-width:600px) and (max-width:1090px) {
+@media screen and (min-width:100px) and (max-width:1090px) {
     #user-input {
         width:40%;
     }
     .chat-input {
         padding-left: 0%;
-        top: 94%;
-        position:sticky;
+        position: absolute;
+        bottom: 0px;
+        width: 99vw;
+    }
+    .flexbox-item-1 {
+        display: none;
+    }
+    .flexbox-item-2 {
+        width: 100vw;
+    }
+    .flexbox-item-3 {
+        display: none;
     }
 }
 
