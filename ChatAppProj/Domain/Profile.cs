@@ -15,6 +15,9 @@ namespace ChatApp.Domain
          
         }
         public string Name { get; set; }
+
+        [EmailAddress]
+        // https://docs.microsoft.com/en-us/dotnet/api/system.net.mail.mailaddress?view=netcore-3.0
         public string EmailAddress { get; set; }
         public string FavouriteColor { get; set; }
         public byte[] ProfilePicture { get; set; }

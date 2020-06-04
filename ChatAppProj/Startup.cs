@@ -46,6 +46,7 @@ namespace ChatApp
                  .AddDefaultTokenProviders();
 
             services.AddScoped<IUserClaimsPrincipalFactory<Profile>, ProfileUserClaimsPrincipalFactory>();
+
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;

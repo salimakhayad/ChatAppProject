@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ChatApp.Domain
 {
-    public class ProfileUserClaimsPrincipalFactory:UserClaimsPrincipalFactory<Profile>
+    public class ProfileUserClaimsPrincipalFactory : UserClaimsPrincipalFactory<Profile>
     {
         public ProfileUserClaimsPrincipalFactory(UserManager<Profile> userManager, IOptions<IdentityOptions> optionsAccessor) : base(userManager, optionsAccessor)
         {
@@ -17,7 +17,7 @@ namespace ChatApp.Domain
         protected override async Task<ClaimsIdentity> GenerateClaimsAsync(Profile user)
         {
             var identity = await base.GenerateClaimsAsync(user);
-            identity.AddClaim(new Claim("FavouriteColor", user.FavouriteColor));
+            //identity.AddClaim(new Claim("x", user.x));
             return identity;
         }
     }

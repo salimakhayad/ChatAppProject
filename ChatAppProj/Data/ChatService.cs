@@ -25,7 +25,7 @@ namespace ChatApp.Data
         }
         public void DeleteChatById(int Id)
         {
-            var chat = _context.Chats.Where(chat => chat.Id== Id).FirstOrDefault();
+            var chat = _context.Chats.Where(chat => chat.Id== Id.ToString()).FirstOrDefault();
             if (chat != null)
             {
                 _context.Chats.Remove(chat);
@@ -43,7 +43,7 @@ namespace ChatApp.Data
    
         public void DeleteGroupById(int Id)
         {
-            var group = _context.Groups.Where(group => group.Id == Id).FirstOrDefault();
+            var group = _context.Groups.Where(group => group.Id == Id.ToString()).FirstOrDefault();
             if (group != null)
             {
                 _context.Groups.Remove(group);
@@ -52,7 +52,7 @@ namespace ChatApp.Data
 
         public void DeleteMessageById(int Id)
         {
-            var message = _context.Messages.Where(msg => msg.Id == Id).FirstOrDefault();
+            var message = _context.Messages.Where(msg => msg.Id == Id.ToString()).FirstOrDefault();
             if (message != null)
             {
                 _context.Messages.Remove(message);
@@ -60,7 +60,7 @@ namespace ChatApp.Data
         }
         public void DeleteGroupProfile(int id)
         {
-            var gp = _context.GroupProfiles.Where(g => g.Id == id).FirstOrDefault();
+            var gp = _context.GroupProfiles.Where(g => g.Id == id.ToString()).FirstOrDefault();
             if (gp != null)
             {
                 _context.GroupProfiles.Remove(gp);

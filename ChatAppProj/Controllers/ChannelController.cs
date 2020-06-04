@@ -20,18 +20,14 @@ namespace ChatApp.Controllers
     public class ChannelController:Controller
     {
         private readonly IChatService _chatService;
-        private readonly IUserStore<Profile> _userStore;
-        private readonly IUserClaimsPrincipalFactory<Profile> _claimsPrincipalFactory;
         private readonly SignInManager<Profile> _signInManager;
         private readonly UserManager<Profile> _userManager;
 
 
-        public ChannelController(IChatService service, IUserStore<Profile> userStore, UserManager<Profile> userManager, IUserClaimsPrincipalFactory<Profile> claimsPrincipalFactory, SignInManager<Profile> signInManager)
+        public ChannelController(IChatService service, UserManager<Profile> userManager, SignInManager<Profile> signInManager)
         {
             this._chatService = service;
             this._userManager = userManager;
-            this._claimsPrincipalFactory = claimsPrincipalFactory;
-            this._userStore = userStore;
             this._signInManager = signInManager;
         }
        
@@ -44,7 +40,7 @@ namespace ChatApp.Controllers
             var profile = _chatService.GetAllProfiles().Where(x => x.Id == profileId).FirstOrDefault();
 
             var selectedChannel = _chatService.GetAllChannels()
-                  .FirstOrDefault(c => c.Id == channelId); 
+                  .FirstOrDefault(c => c.Id == channelId.ToString()); 
 
             var currentGroup = _chatService.GetAllGroups().FirstOrDefault(g => g.Channels.Contains(selectedChannel));
            
@@ -117,7 +113,7 @@ namespace ChatApp.Controllers
             model.Profile = profile;
             model.ProfileId = profile.Id;
             model.SelectedChannel = selectedChannel;
-            model.Id = currentGroup.Id;
+            model.Id = Int32.Parse(currentGroup.Id);
             model.ProfilesInside = filteredUsersInGroup;
             model.ProfilesOutside = UsersOutsideGroup;
 
@@ -128,7 +124,7 @@ namespace ChatApp.Controllers
         public IActionResult Create(int groupId)
         {
            
-            var groupFromDb = _chatService.GetAllGroups().FirstOrDefault(g => g.Id == groupId);
+            var groupFromDb = _chatService.GetAllGroups().FirstOrDefault(g => g.Id == groupId.ToString());
 
             CreateChannelModel model = new CreateChannelModel()
             {
@@ -144,7 +140,7 @@ namespace ChatApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                var group = _chatService.GetAllGroups().FirstOrDefault(g => g.Id == model.groupId);
+                var group = _chatService.GetAllGroups().FirstOrDefault(g => g.Id == model.groupId.ToString());
        
                 _chatService.InsertChannel(
                     new Channel()

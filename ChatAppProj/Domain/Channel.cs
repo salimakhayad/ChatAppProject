@@ -12,11 +12,15 @@ namespace ChatApp.Domain
         {
            
         }
-        public int Id { get; set; }
+        public string Id { get; set; }
         public string Name { get; set; }
+
+        [ForeignKey("Chat")]
+        public string ChatId { get; set; }
         public Chat Chat { get; set; }
+
         [ForeignKey("Group")]
-        public int GroupId { get; set; }
+        public string GroupId { get; set; }
         public Group Group { get; set; }
 
     }

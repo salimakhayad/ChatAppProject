@@ -12,16 +12,20 @@ namespace ChatApp.Domain
         public Message()
         {
         }
-        public int Id { get; set; }
-        public string ProfileName { get; set; }
+        public string Id { get; set; }
         public string Text { get; set; }
         public DateTime Timestamp { get; set;}
         public byte[] File { get; set; }
 
-        [ForeignKey("Chat")]
-        public int ChatId { get; set; }
-        public Chat Chat { get; set; }
         public MessageType Type { get; set; }
+
+        [ForeignKey("Chat")]
+        public string ChatId { get; set; }
+        public Chat Chat { get; set; }
+        [ForeignKey("Profile")]
+        public string ProfileId { get; set; }
+        public Profile Profile { get; set; }
+      
 
     }
 }

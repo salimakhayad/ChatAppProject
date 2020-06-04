@@ -15,7 +15,7 @@ namespace ChatApp.Domain
             GroupProfiles = new List<GroupProfile>();
         }
     
-        public int Id { get; set; }
+        public string Id { get; set; }
         public string Name { get; set; }
         [ForeignKey("Profile")]
         public string ProfileId { get; set; }

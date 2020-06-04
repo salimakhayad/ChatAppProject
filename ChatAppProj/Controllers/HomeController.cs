@@ -21,17 +21,17 @@ namespace ChatApp.Controllers
     public class HomeController : Controller
     {
         private readonly IChatService _chatService;
-        private readonly IUserClaimsPrincipalFactory<Profile> _claimsPrincipalFactory;
         private readonly SignInManager<Profile> _signInManager;
         private readonly UserManager<Profile> _userManager;
+        private readonly IUserClaimsPrincipalFactory<Profile> _claimsPrincipalFactory;
         private Profile _currentProfile;
 
-        public HomeController(IChatService chatService, UserManager<Profile> userManager, IUserClaimsPrincipalFactory<Profile> claimsPrincipalFactory, SignInManager<Profile> signInManager)
+        public HomeController(IChatService chatService, IUserClaimsPrincipalFactory<Profile> claimsPrincipalFactory, UserManager<Profile> userManager, SignInManager<Profile> signInManager)
         {
             this._userManager = userManager;
-            this._claimsPrincipalFactory = claimsPrincipalFactory;
             this._chatService = chatService;
             this._signInManager = signInManager;
+            this._claimsPrincipalFactory = claimsPrincipalFactory;
         }
         [Route("")]
         [Authorize]
@@ -89,8 +89,8 @@ namespace ChatApp.Controllers
                     {
                         Id = Guid.NewGuid().ToString(),
                         UserName = model.UserName,
-                        EmailAddress = model.EmailAddress,
-                        FavouriteColor = "Dark Orange"                       
+                        EmailAddress = model.EmailAddress
+                    
                     };
                     var identityResult = await _userManager.CreateAsync(user, model.Password);
                     if (identityResult.Succeeded)

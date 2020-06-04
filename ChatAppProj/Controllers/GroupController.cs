@@ -20,18 +20,14 @@ namespace ChatApp.Controllers
     public class GroupController : Controller
     {
         private readonly IChatService _chatService;
-        private readonly IUserStore<Profile> _userStore;
-        private readonly IUserClaimsPrincipalFactory<Profile> _claimsPrincipalFactory;
         private readonly SignInManager<Profile> _signInManager;
         private readonly UserManager<Profile> _userManager;
         private Profile _currentProfile;
 
-        public GroupController(IChatService service, IUserStore<Profile> userStore, UserManager<Profile> userManager, IUserClaimsPrincipalFactory<Profile> claimsPrincipalFactory, SignInManager<Profile> signInManager)
+        public GroupController(IChatService service, UserManager<Profile> userManager, SignInManager<Profile> signInManager)
         {
             this._chatService = service;
             this._userManager = userManager;
-            this._claimsPrincipalFactory = claimsPrincipalFactory;
-            this._userStore = userStore;
             this._signInManager = signInManager;
         }
         [Authorize]
@@ -48,7 +44,7 @@ namespace ChatApp.Controllers
             var profileId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
             var profile = _chatService.GetAllProfiles().Where(x => x.Id == profileId).FirstOrDefault();
 
-            var group = _chatService.GetAllGroups().FirstOrDefault(g => g.Id == groupId);
+            var group = _chatService.GetAllGroups().FirstOrDefault(g => g.Id == groupId.ToString());
             var channels = _chatService.GetAllChannels()
                   .Where(c => c.GroupId == group.Id);
 
@@ -58,8 +54,7 @@ namespace ChatApp.Controllers
              var userGroup = new GroupProfile()
              {
                  GroupId = group.Id,
-                 ProfileId = profileId,
-                 Role = RoleProfile.Member
+                 ProfileId = profileId
              };
              _chatService.InsertGroupProfile(userGroup);
              _chatService.SaveChanges();
@@ -102,6 +97,7 @@ namespace ChatApp.Controllers
             var currentUserId = this._signInManager.UserManager.GetUserId(HttpContext.User);
             _currentProfile = _chatService.GetAllProfiles().Where(u => u.Id == currentUserId).First();
 
+            // create group
             Group newGroup = new Group()
             {
                 Name = model.Name,
@@ -123,46 +119,25 @@ namespace ChatApp.Controllers
                         
              _chatService.SaveChanges();
 
-            _chatService.InsertChannel( new Channel() {
-                                        Name = "Main",
-                                        GroupId = groupFromDb.Id,
-                                        Group = groupFromDb
-                                        });
+            var newChannel = new Channel()
+            {
+                Name = "Main",
+                GroupId = groupFromDb.Id,
+                Group = groupFromDb
+            };
+            _chatService.InsertChannel(newChannel);
             _chatService.SaveChanges();
-            var groupFromDbWithChannel = _chatService.GetAllGroups().FirstOrDefault(g => g.Id == newGroup.Id);
+            groupFromDb = _chatService.GetAllGroups().FirstOrDefault(g => g.Id == newGroup.Id);
             var newChat = new Chat()
             {
                 ChatType = ChatType.Group,
                 Messages = new List<Message>(),
-                Channel = groupFromDbWithChannel.Channels.FirstOrDefault(),
-                ChannelId = groupFromDbWithChannel.Channels.FirstOrDefault().Id
+                Channel = groupFromDb.Channels.FirstOrDefault(),
+                ChannelId = groupFromDb.Channels.FirstOrDefault().Id
             };
 
             _chatService.InsertChat(newChat);
             _chatService.SaveChanges();
-
-            var chatFromDb = _chatService.GetAllChats().FirstOrDefault(g => g.Id == newChat.Id);
-            var msg = new Message()
-            {
-                ProfileName = "Server",
-                Text = "Welcome to our Server!",
-                Chat = chatFromDb,
-                ChatId = chatFromDb.Id,
-                Timestamp = DateTime.Now
-             };
-
-            _chatService.InsertMessage(msg);
-
-            var chatFromDbn = _chatService.GetAllChats().FirstOrDefault(g => g.Id == newChat.Id);
-
-            _chatService.SaveChanges();
-
-
-            var group = _chatService.GetAllGroups().FirstOrDefault(g => g.Id == newGroup.Id);
-            var getAllMessages = _chatService.GetAllMessages();
-   
-
-
             return RedirectToAction("Index");
         }
     }

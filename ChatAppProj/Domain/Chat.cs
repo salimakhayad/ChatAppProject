@@ -14,10 +14,10 @@ namespace ChatApp.Domain
         public Chat()
         {
         }
-        public int Id { get; set; }
+        public string Id { get; set; }
 
         [ForeignKey("Channel")]
-        public int ChannelId { get; set; }
+        public string ChannelId { get; set; }
         public Channel Channel { get; set; }
 
         public ChatType ChatType { get; set; }

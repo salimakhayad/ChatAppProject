@@ -12,14 +12,11 @@ namespace ChatApp.Hubs
 {
     public class ChatHub : Hub
     {
-        private readonly IUserClaimsPrincipalFactory<Profile> _claimsPrincipalFactory;
         private readonly IChatService _chatService;
 
-        public ChatHub(IChatService service,IUserClaimsPrincipalFactory<Profile> claimsPrincipalFactory)
+        public ChatHub(IChatService service)
         {
-            _claimsPrincipalFactory = claimsPrincipalFactory;
             _chatService = service;
-          
         }
 
         public string GetConnectionId() => Context.ConnectionId;
@@ -32,12 +29,11 @@ namespace ChatApp.Hubs
             var tr = _chatService.GetAllTimeRegistrations()
                 .FirstOrDefault(tr => tr.ProfileId == profileId);
             
-            tr.IsOnline = false;
+            tr.EndTime = DateTime.Now;
             _chatService.SaveChanges();
 
-            var trs = _chatService.GetAllTimeRegistrations().Where(t => t.ChatId == tr.ChatId && tr.IsOnline);
+            var trs = _chatService.GetAllTimeRegistrations().Where(t => t.ChatId == tr.ChatId && tr.EndTime == null);
             var channelId = _chatService.GetAllChats().FirstOrDefault(c => c.Id == tr.ChatId).ChannelId.ToString();
-            var usersCurrentlyOnline = trs.Select(tr => tr.ProfileName);
 
             Clients.Group(channelId).
             SendAsync("UserLeftChannel", 

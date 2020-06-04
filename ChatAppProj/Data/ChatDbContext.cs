@@ -34,6 +34,9 @@ namespace ChatApp.Data
              .HasKey(x => new { x.GroupId, x.ProfileId });
 
             
+            
+
+
 
 
 

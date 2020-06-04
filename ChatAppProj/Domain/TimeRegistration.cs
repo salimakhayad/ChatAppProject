@@ -8,16 +8,16 @@ namespace ChatApp.Domain
 {
     public class TimeRegistration
     {
-       
         public int Id { get; set; }
+        public DateTime  StartTime { get; set; }
+        public DateTime EndTime { get; set; }
 
         [ForeignKey("Chat")]
-        public int ChatId { get; set; }
+        public string ChatId { get; set; }
         public virtual Chat Chat { get; set; }
+        [ForeignKey("Profile")]
         public string ProfileId { get; set; }
-        public string ProfileName { get; set; }
-        // insertiondate
-        public bool IsOnline { get; set; }
+        public virtual Profile Profile { get; set; }
 
     }
 }

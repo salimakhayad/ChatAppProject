@@ -24,58 +24,75 @@
     <div class="flexbox-item flexbox-item-2">
 
         <div id="messageDiv" class="messages">
+            <!--Welcome msg-->
+            <div class="message">
+                <header>Server</header>
+                <p>Welcome!</p>
+                <small>@DateTime.Now.ToShortTimeString()</small>
+            </div>
+                @foreach (var message in Model.SelectedChannel.Chat.Messages)
+                {
+                    <div class="message" id="@message.Id">
+                        <header>@message.Profile.Name</header>
+                        @if (message.Type == MessageType.Text)
+                        {
+                            <p>@message.Text</p>
+                        }
+                        else if (message.Type == MessageType.Gif)
+                        {
+                            <p><img src="@message.Text" width="150" height="150" /></p>
+                        }
+                        else if (message.Type == MessageType.Image)
+                        {
+                            <p><img src="@String.Format("data:image/gif;base64,{0}", Convert.ToBase64String(message.File))" width="150" height="150" /> </p>
+                        }
+                        else if (message.Type == MessageType.File)
+                        {
+                            <p><img src="@message.Text" /></p>
+                        }
+                        <!--append 3 dots for text msg-->
+                        @if (message.Type == MessageType.Text)
+                        {
+                            <div class="dropdown">
+                                <img class="options" id="@message.Id" src="~/img/3-dots.png" width="42" height="42" />
+                                <div class="dropdown-content">
+                                    <a href="#">reply</a>
+                                    <!-- users can only edit delete their own except for Owner -->
+                                    @if (Model.ProfileId == message.Profile.Id || Model.IsOwner)
+                                    {
+                                        <a href="#">edit</a>
+                                        <a href="#">delete</a>
+                                    }
 
-            @foreach (var message in Model.SelectedChannel.Chat.Messages)
-            {
-            <div class="message" id="@message.Id">
-                <header>@message.ProfileName</header>
-                @if (message.Type == MessageType.Text)
-                {
-                    <p>@message.Text</p>
-                }
-                else if (message.Type == MessageType.Gif)
-                {
-                    <p><img src="@message.Text" width="150" height="150" /></p>
-                }
-                else if (message.Type == MessageType.Image)
-                {
-                    <p><img src="@String.Format("data:image/gif;base64,{0}", Convert.ToBase64String(message.File))" width="150" height="150" /> </p>
-                }
-                else if (message.Type == MessageType.File)
-                {
-                     <p><img src="@message.Text" /></p>
-                }
-                <!--add 3 dots for options-->
-                @if (message.ProfileName != "server" && message.Type== MessageType.Text )
-                {
-                     <p><img style="display:none" src="~/img/3-dots.png" width="20" height="20" /></p>
-                }
-                <small>@message.Timestamp.ToShortTimeString()</small>
+                                </div>
+                            </div>
+                        }
+                        <small>@message.Timestamp.ToShortTimeString()</small>
 
-</div>
-            }
-          
+                    </div>
+                }
+
+            </div>
+
+            <!--user input-->
+            <form id="inputsendmessage" class="chat-input" onsubmit="sendMessage(event)" asp-controller="Chat" asp-action="CreateMessage">
+                <input type="hidden" name="chatId" value="@Model.SelectedChannel.Chat.Id" />
+                <!--Imgs upload-->
+                <label for="file-upload" class="custom-file-upload">
+                    <img src="~/icons/upload-files-icon.png" alt="upload-files-icon" />
+                    <input type="file" id="file-input" />
+                </label>
+                <input id="file-upload" type="file" />
+
+                <!--Text-->
+                <input type="text" name="message" id="user-input" autofocus />
+
+                <!--Gif-->
+                <a id="UseGifs" class="gifIcon">
+                    <img src="~/icons/gif-icon.png" id="gifImg" alt="gif-icon" />
+                </a>
+            </form>
         </div>
-
-        <!--user input-->
-        <form id="inputsendmessage" class="chat-input" onsubmit="sendMessage(event)" asp-controller="Chat" asp-action="CreateMessage">
-            <input type="hidden" name="chatId" value="@Model.SelectedChannel.Chat.Id" />
-            <!--Imgs upload-->
-            <label for="file-upload" class="custom-file-upload">
-                <img src="~/icons/upload-files-icon.png" alt="upload-files-icon" />
-                <input type="file" id="file-input" />
-            </label>
-            <input id="file-upload" type="file" />
-
-            <!--Text-->
-            <input type="text" name="message" id="user-input" autofocus />
-
-            <!--Gif-->
-            <a id="UseGifs" class="gifIcon">
-                <img src="~/icons/gif-icon.png" id="gifImg" alt="gif-icon" />
-            </a>
-        </form>
-    </div>
     <!--Users in channel-->
     <div class="flexbox-item flexbox-item-3">
         <div id="onlineList" class="online">
@@ -177,7 +194,7 @@
             });
         });
 
-        // file selected event
+        // Image selected event
         $('input[type=file]').change(function (e) {
             console.log("Image selected");
             var chatId = "@Html.Raw(Model.SelectedChannel.Chat.Id)";
@@ -200,16 +217,27 @@
         }
         );
 
-        $('div[class=message').hover(function (e) {
-            console.log("hovering msg");
+        $('img[class=options').hover(
+            // hover in function
+            function (e) {
+            console.log("hovering in img options");
             var msgeId = e.target.id;
-            console.log(e.target.childNodes[3].childNodes[0]);
-           // <img style="display:none" 
-            //console.log(e.target.childNodes[5]);
-           // e.target.childNodes[3].style.display = "block";
-            
-        });
-       
+            console.log(msgeId);
+                e.target.src = "https://i.imgur.com/ISzNXan.png";
+
+                // dropdown content display block
+
+            },
+             // hover out function
+            function (e) {
+                console.log("hovering out img options");
+                var msgeId = e.target.id;
+                e.target.src = "https://i.imgur.com/lKRDYeg.png";
+                console.log(msgeId);
+
+            }
+        );
+
         // #endregion
 
        //#region printFunctions
@@ -244,7 +272,7 @@
         }
         var printMessage = function (data) {
 
-           
+
             console.log("printMessage");
 
             var message = document.createElement("div");
@@ -259,6 +287,15 @@
             var small = document.createElement("small");
             var text = data.timestamp;
             small.appendChild(document.createTextNode(text));
+
+            // <div class="dropdown">
+            //          <img class="options" id="message.Id" src="~/img/3-dots.png" width="42" height="42" />
+            //          <div class="dropdown-content">
+            //         <a href="#">reply</a>
+            //         <a href="#">forward</a>
+            //         <a href="#">delete</a>
+            //             </div>
+            // </div>
 
             message.appendChild(header);
             message.appendChild(p);
@@ -375,14 +412,14 @@
         var setUserOnline = function (data) {
 
             console.log("setUserOnline");
-           
-          
+
+
                 var userElement = document.getElementById(data.profileId);
                 console.log(data.profileId);
 
                 var offlineList = document.getElementById("offlineList");
                 var onlineList = document.getElementById("onlineList");
-            
+
                 // check if its a newly joined user
                 if (userElement != undefined) {
 
@@ -391,7 +428,7 @@
                     {
                         offlineList.removeChild(userElement);
                     }
-                                        
+
                 } else {
                     // newly joined user went online
                     var newUserElement = document.createElement("div");
@@ -441,7 +478,7 @@
         var sendGif = function (data) {
             console.log("sendGif");
             swapGifInputWithChatInput();
-           
+
             var formData = new FormData();
             formData.set("chatId", data.chatId);
             formData.set("gifUrl", data.gifUrl);
@@ -477,6 +514,7 @@
 
         }
        //#endregion
+
 
         // CLEAR messages
         var clearMessagesDiv = function () {
@@ -527,21 +565,21 @@
             {
                 if (message.Type.Equals(MessageType.Text))
                 {
-                  
-                     @:displayMessage("@message.ProfileName", "@message.Text", "@message.Timestamp", "Text");
+
+                     @:displayMessage("@message.Profile.Name", "@message.Text", "@message.Timestamp", "Text");
                 }
                 else if (message.Type.Equals(MessageType.Image))
                 {
-               
-                    @:displayMessage("@message.ProfileName","@message.Text","@message.Timestamp", "Image");
+
+                    @:displayMessage("@message.Profile.Name","@message.Text","@message.Timestamp", "Image");
                 }
                 else if (message.Type.Equals(MessageType.Gif))
                 {
-                      @:displayMessage("@message.ProfileName","@message.Text","@message.Timestamp", "Gif");
+                      @:displayMessage("@message.Profile.Name","@message.Text","@message.Timestamp", "Gif");
                 }
                 else if (message.Type.Equals(MessageType.File))
                 {
-                    @:displayMessage("@message.ProfileName","@message.Text","@message.Timestamp", "File");
+                    @:displayMessage("@message.Profile.Name","@message.Text","@message.Timestamp", "File");
                 }
 
             }
@@ -558,7 +596,7 @@
             var header = document.createElement("header");
             header.innerHTML = profileName;
             divElement.appendChild(header);
-       
+
             if (messageType == "Text")
             {
              var p = document.createElement("p");
@@ -572,18 +610,18 @@
                 img.width = 150;
                 img.height = 150;
                 divElement.appendChild(img);
-       
+
             }else if (messageType == "File")
             {
-       
+
             }
-       
-       
+
+
             var small = document.createElement("small");
             small.innerHTML = messageTimeStamp;
-       
-          
-            
+
+
+
             divElement.appendChild(small);
             msgeDiv.appendChild(divElement);
         }
