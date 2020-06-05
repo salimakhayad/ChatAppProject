@@ -14,12 +14,12 @@ namespace ChatApp.Domain
             Channels = new List<Channel>();
             GroupProfiles = new List<GroupProfile>();
         }
-    
-        public string Id { get; set; }
+        [Key]
+        public Guid Id { get; set; }
         public string Name { get; set; }
         [ForeignKey("Profile")]
         public string ProfileId { get; set; }
-        public Profile Profile { get; set; }
+        public virtual Profile Profile { get; set; }
         public string Content { get; set; }
         public byte[] Photo { get; set; }
         public PrivacyType Privacy { get; set; }

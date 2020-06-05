@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChatApp.Migrations
 {
     [DbContext(typeof(ChatDbContext))]
-    [Migration("20200423175112_TimeRegistrations")]
-    partial class TimeRegistrations
+    [Migration("20200605110314_init")]
+    partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -28,66 +28,48 @@ namespace ChatApp.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("GroupId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("ChatId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("GroupId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ChatId");
+
                     b.HasIndex("GroupId");
 
                     b.ToTable("Channels");
                 });
 
-            modelBuilder.Entity("ChatApp.Domain.ChannelProfile", b =>
-                {
-                    b.Property<int>("ChannelId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ProfileId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int?>("GroupId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ChannelId", "ProfileId");
-
-                    b.HasIndex("GroupId");
-
-                    b.HasIndex("ProfileId");
-
-                    b.ToTable("ChannelProfiles");
-                });
-
             modelBuilder.Entity("ChatApp.Domain.Chat", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("ChannelId")
-                        .HasColumnType("int");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("ChatType")
                         .HasColumnType("int");
 
+                    b.Property<Guid>("GroupId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("ChannelId")
-                        .IsUnique();
+                    b.HasIndex("GroupId");
 
                     b.ToTable("Chats");
                 });
 
             modelBuilder.Entity("ChatApp.Domain.Group", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Content")
                         .HasColumnType("nvarchar(max)");
@@ -97,6 +79,9 @@ namespace ChatApp.Migrations
 
                     b.Property<byte[]>("Photo")
                         .HasColumnType("varbinary(max)");
+
+                    b.Property<int>("Privacy")
+                        .HasColumnType("int");
 
                     b.Property<string>("ProfileId")
                         .HasColumnType("nvarchar(450)");
@@ -110,14 +95,11 @@ namespace ChatApp.Migrations
 
             modelBuilder.Entity("ChatApp.Domain.GroupProfile", b =>
                 {
-                    b.Property<int>("GroupId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("GroupId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ProfileId")
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("Role")
-                        .HasColumnType("int");
 
                     b.HasKey("GroupId", "ProfileId");
 
@@ -128,16 +110,18 @@ namespace ChatApp.Migrations
 
             modelBuilder.Entity("ChatApp.Domain.Message", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("ChatId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("ChatId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("ProfileName")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<byte[]>("File")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("ProfileId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Text")
                         .HasColumnType("nvarchar(max)");
@@ -145,9 +129,14 @@ namespace ChatApp.Migrations
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ChatId");
+
+                    b.HasIndex("ProfileId");
 
                     b.ToTable("Messages");
                 });
@@ -159,16 +148,16 @@ namespace ChatApp.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("ChatId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("ChatId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("ProfileId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<DateTime>("TimeEntered")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("TimeLeft")
+                    b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
@@ -386,13 +375,10 @@ namespace ChatApp.Migrations
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
 
-                    b.Property<int?>("ChatId")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("ChatId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("EmailAddress")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FavouriteColor")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
@@ -408,6 +394,12 @@ namespace ChatApp.Migrations
 
             modelBuilder.Entity("ChatApp.Domain.Channel", b =>
                 {
+                    b.HasOne("ChatApp.Domain.Chat", "Chat")
+                        .WithMany()
+                        .HasForeignKey("ChatId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("ChatApp.Domain.Group", "Group")
                         .WithMany("Channels")
                         .HasForeignKey("GroupId")
@@ -415,31 +407,11 @@ namespace ChatApp.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ChatApp.Domain.ChannelProfile", b =>
-                {
-                    b.HasOne("ChatApp.Domain.Channel", "Channel")
-                        .WithMany()
-                        .HasForeignKey("ChannelId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("ChatApp.Domain.Group", null)
-                        .WithMany("ChannelProfiles")
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("ChatApp.Domain.Profile", "Profile")
-                        .WithMany()
-                        .HasForeignKey("ProfileId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("ChatApp.Domain.Chat", b =>
                 {
-                    b.HasOne("ChatApp.Domain.Channel", "Channel")
-                        .WithOne("Chat")
-                        .HasForeignKey("ChatApp.Domain.Chat", "ChannelId")
+                    b.HasOne("ChatApp.Domain.Group", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
@@ -455,7 +427,7 @@ namespace ChatApp.Migrations
             modelBuilder.Entity("ChatApp.Domain.GroupProfile", b =>
                 {
                     b.HasOne("ChatApp.Domain.Group", "Group")
-                        .WithMany()
+                        .WithMany("GroupProfiles")
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -474,6 +446,11 @@ namespace ChatApp.Migrations
                         .HasForeignKey("ChatId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("ChatApp.Domain.Profile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("ChatApp.Domain.TimeRegistration", b =>

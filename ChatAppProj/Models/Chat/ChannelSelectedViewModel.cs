@@ -9,7 +9,7 @@ namespace ChatApp.Models.Group
     public class ChannelSelectedViewModel
     {
       
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string Name { get; set; }
         public string ProfileId { get; set; }
         public bool IsOwner { get; set; }

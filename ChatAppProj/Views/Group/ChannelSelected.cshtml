@@ -32,44 +32,47 @@
             </div>
                 @foreach (var message in Model.SelectedChannel.Chat.Messages)
                 {
-                    <div class="message" id="@message.Id">
-                        <header>@message.Profile.Name</header>
-                        @if (message.Type == MessageType.Text)
-                        {
-                            <p>@message.Text</p>
-                        }
-                        else if (message.Type == MessageType.Gif)
-                        {
-                            <p><img src="@message.Text" width="150" height="150" /></p>
-                        }
-                        else if (message.Type == MessageType.Image)
-                        {
-                            <p><img src="@String.Format("data:image/gif;base64,{0}", Convert.ToBase64String(message.File))" width="150" height="150" /> </p>
-                        }
-                        else if (message.Type == MessageType.File)
-                        {
-                            <p><img src="@message.Text" /></p>
-                        }
-                        <!--append 3 dots for text msg-->
-                        @if (message.Type == MessageType.Text)
-                        {
-                            <div class="dropdown">
-                                <img class="options" id="@message.Id" src="~/img/3-dots.png" width="42" height="42" />
-                                <div class="dropdown-content">
-                                    <a href="#">reply</a>
-                                    <!-- users can only edit delete their own except for Owner -->
-                                    @if (Model.ProfileId == message.Profile.Id || Model.IsOwner)
-                                    {
-                                        <a href="#">edit</a>
-                                        <a href="#">delete</a>
-                                    }
+        <div class="message" id="@message.Id">
+            <!--<header>message.Profile.UserName</header>-->
+            <header>
+                <img class="img-circle" src="@String.Format("data:image/gif;base64,{0}", Convert.ToBase64String(message.Profile.ProfilePicture))">
+            </header>
+                @if (message.Type == MessageType.Text)
+                {
+                    <p>@message.Text</p>
+                }
+                else if (message.Type == MessageType.Gif)
+                {
+                    <p><img src="@message.Text" width="150" height="150" /></p>
+                }
+                else if (message.Type == MessageType.Image)
+                {
+                    <p><img src="@String.Format("data:image/gif;base64,{0}", Convert.ToBase64String(message.File))" width="150" height="150" /> </p>
+                }
+                else if (message.Type == MessageType.File)
+                {
+                    <p><img src="@message.Text" /></p>
+                }
+                <!--append 3 dots for text msg-->
+                @if (message.Type == MessageType.Text)
+                {
+                    <div class="dropdown">
+                        <img class="options" id="@message.Id" src="~/img/3-dots.png" width="42" height="42" />
+                        <div class="dropdown-content">
+                            <a href="#">reply</a>
+                            <!-- users can only edit delete their own except for Owner -->
+                            @if (Model.ProfileId == message.Profile.Id || Model.IsOwner)
+                            {
+                                <a href="#">edit</a>
+                                <a href="#">delete</a>
+                            }
 
-                                </div>
-                            </div>
-                        }
-                        <small>@message.Timestamp.ToShortTimeString()</small>
-
+                        </div>
                     </div>
+                }
+                <small>@message.Timestamp.ToShortTimeString()</small>
+
+</div>
                 }
 
             </div>
@@ -279,7 +282,7 @@
             message.classList.add("message");
 
             var header = document.createElement("header");
-            header.appendChild(document.createTextNode(data.name));
+            header.appendChild(document.createTextNode(data.username));
 
             var p = document.createElement("p");
             p.appendChild(document.createTextNode(data.text));
@@ -447,7 +450,7 @@
        //#region axios | post
         var joinChannel = function () {
             console.log("joinChannel");
-            var url = "/Chat/JoinChannel/" + _connectionId + "/@Model.Id"
+            var url = "/Chat/JoinChannel/" + _connectionId + "/@Model.SelectedChannel.Id"
         axios.post(url, null)
             .then(res => {
                     console.log("Channel Joined!", res);

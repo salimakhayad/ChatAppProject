@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,18 +11,19 @@ namespace ChatApp.Domain
     {
         public Channel()
         {
-           
         }
-        public string Id { get; set; }
+        [Key]
+        public int Id { get; set; }    
         public string Name { get; set; }
 
         [ForeignKey("Chat")]
-        public string ChatId { get; set; }
-        public Chat Chat { get; set; }
+        public Guid ChatId { get; set; }
+        public virtual Chat Chat { get; set; }
 
         [ForeignKey("Group")]
-        public string GroupId { get; set; }
-        public Group Group { get; set; }
+        public Guid GroupId { get; set; }
+        public virtual Group Group { get; set; }
+
 
     }
 }

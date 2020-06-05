@@ -15,12 +15,13 @@ namespace ChatApp.Data
         IEnumerable<Profile> GetAllProfiles();
         IEnumerable<GroupProfile> GetAllGroupProfiles();
         IEnumerable<TimeRegistration> GetAllTimeRegistrations();
+        Chat GetChatById(Guid id);
         void DeleteMessageById(int Id);
         void DeleteGroupById(int Id);
         void DeleteChatById(int Id);
         void DeleteProfileById(int Id);
-        void DeleteTimeRegistration(int Id);
-        void DeleteGroupProfile(int id);
+        void DeleteTimeRegistrationById(int Id);
+        // void DeleteGroupProfile(int id);
         void InsertChat(Chat chat);
         void InsertGroup(Group group);
         void InsertProfile(Profile Profile);

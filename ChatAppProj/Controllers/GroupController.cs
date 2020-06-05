@@ -38,19 +38,18 @@ namespace ChatApp.Controllers
             model.Groups = grps.ToList();
             return View(model);
         }
-        public IActionResult Join(int groupId)
+        public IActionResult Join(Guid groupId)
         {
-
             var profileId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
             var profile = _chatService.GetAllProfiles().Where(x => x.Id == profileId).FirstOrDefault();
 
-            var group = _chatService.GetAllGroups().FirstOrDefault(g => g.Id == groupId.ToString());
+            var group = _chatService.GetAllGroups().FirstOrDefault(g => g.Id.ToString() == groupId.ToString());
             var channels = _chatService.GetAllChannels()
-                  .Where(c => c.GroupId == group.Id);
-
-         var userIsAlrdyInGroup = _chatService.GetAllGroupProfiles().Where(g => g.GroupId == group.Id && g.ProfileId == profileId).Any();
-         if (!userIsAlrdyInGroup)
-         {
+                  .Where(c => c.Group == group);
+        // check if user is in group 
+         var userIsInGroup = _chatService.GetAllGroupProfiles().Where(g => g.GroupId == group.Id && g.ProfileId == profileId).Any();
+         if (!userIsInGroup)
+         {  //if not add to group
              var userGroup = new GroupProfile()
              {
                  GroupId = group.Id,
@@ -59,25 +58,26 @@ namespace ChatApp.Controllers
              _chatService.InsertGroupProfile(userGroup);
              _chatService.SaveChanges();
          }
+          
           // var usersInGroup = _chatService.GetAllGroupProfiles().Where(g => g.GroupId == group.Id).Select(x => x.Profile);
-             foreach (var channel in channels)
-             {
-                 var selectedChannel = _chatService.GetAllChannels()
-                  .Where(c => c.Id == channel.Id)
-                  .FirstOrDefault();
-             
-                 var selectedChat = _chatService.GetAllChats()
-                 .Where(chat => chat.ChannelId == selectedChannel.Id)
-                 .FirstOrDefault();
-             
-                 var messages = _chatService.GetAllMessages()
-                .Where(mes => mes.ChatId == selectedChat.Id);
-             
-             
-                 selectedChat.Messages = messages.ToList();
-                 selectedChannel.Chat = selectedChat;
-             }
-           
+          //foreach (var channel in channels)
+          //{
+          //    var selectedChannel = _chatService.GetAllChannels()
+          //     .Where(c => c.Id == channel.Id)
+          //     .FirstOrDefault();
+          //
+          //    var selectedChat = _chatService.GetAllChats()
+          //    .Where(chat => chat.ChannelId == selectedChannel.Id)
+          //    .FirstOrDefault();
+          //
+          //    var messages = _chatService.GetAllMessages()
+          //   .Where(mes => mes.ChatId == selectedChat.Id);
+          //
+          //
+          //    selectedChat.Messages = messages.ToList();
+          //    selectedChannel.Chat = selectedChat;
+          //}
+
             return View(group);
         }
 
@@ -86,8 +86,9 @@ namespace ChatApp.Controllers
             CreateGroupModel model = new CreateGroupModel();
             return View(model);
         }
+
         [HttpPost]
-        public IActionResult Create(CreateGroupModel model)
+        public IActionResult CreatePost(CreateGroupModel model)
         {
             if (!TryValidateModel(model))
             {
@@ -100,12 +101,11 @@ namespace ChatApp.Controllers
             // create group
             Group newGroup = new Group()
             {
+                Id = Guid.NewGuid(),
                 Name = model.Name,
                 Profile = _currentProfile,
                 ProfileId = _currentProfile.Id,
-                Content = model.Content,         
-                GroupProfiles = new List<GroupProfile>(),
-                Channels = new List<Channel>()
+                Content = model.Content
             };
 
             _chatService.InsertGroup(newGroup);
@@ -119,25 +119,32 @@ namespace ChatApp.Controllers
                         
              _chatService.SaveChanges();
 
-            var newChannel = new Channel()
-            {
-                Name = "Main",
-                GroupId = groupFromDb.Id,
-                Group = groupFromDb
-            };
-            _chatService.InsertChannel(newChannel);
-            _chatService.SaveChanges();
-            groupFromDb = _chatService.GetAllGroups().FirstOrDefault(g => g.Id == newGroup.Id);
             var newChat = new Chat()
             {
-                ChatType = ChatType.Group,
-                Messages = new List<Message>(),
-                Channel = groupFromDb.Channels.FirstOrDefault(),
-                ChannelId = groupFromDb.Channels.FirstOrDefault().Id
+                Id = Guid.NewGuid(),
+                ChatType = ChatType.Group,//,
+                Group = groupFromDb,
+                GroupId = groupFromDb.Id
             };
 
             _chatService.InsertChat(newChat);
             _chatService.SaveChanges();
+            var chatFromDb = _chatService.GetAllChats().FirstOrDefault(c => c.Id == newChat.Id);
+
+
+            var newChannel = new Channel()
+            {
+                //Id = Guid.NewGuid(),
+                Name = "Main",
+                GroupId = groupFromDb.Id,
+                Group = groupFromDb,
+                Chat = newChat,
+                ChatId = newChat.Id
+            };
+            _chatService.InsertChannel(newChannel);
+            _chatService.SaveChanges();
+
+
             return RedirectToAction("Index");
         }
     }

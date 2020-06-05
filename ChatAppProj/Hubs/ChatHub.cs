@@ -33,7 +33,7 @@ namespace ChatApp.Hubs
             _chatService.SaveChanges();
 
             var trs = _chatService.GetAllTimeRegistrations().Where(t => t.ChatId == tr.ChatId && tr.EndTime == null);
-            var channelId = _chatService.GetAllChats().FirstOrDefault(c => c.Id == tr.ChatId).ChannelId.ToString();
+            var channelId = _chatService.GetAllChannels().FirstOrDefault(c => c.ChatId == tr.ChatId).Id.ToString();
 
             Clients.Group(channelId).
             SendAsync("UserLeftChannel", 

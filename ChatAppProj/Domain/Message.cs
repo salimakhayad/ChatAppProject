@@ -11,8 +11,10 @@ namespace ChatApp.Domain
     {
         public Message()
         {
+       
         }
-        public string Id { get; set; }
+        [Key]
+        public Guid Id { get; set; }
         public string Text { get; set; }
         public DateTime Timestamp { get; set;}
         public byte[] File { get; set; }
@@ -20,11 +22,11 @@ namespace ChatApp.Domain
         public MessageType Type { get; set; }
 
         [ForeignKey("Chat")]
-        public string ChatId { get; set; }
+        public Guid ChatId { get; set; }
         public Chat Chat { get; set; }
         [ForeignKey("Profile")]
         public string ProfileId { get; set; }
-        public Profile Profile { get; set; }
+        public virtual Profile Profile { get; set; }
       
 
     }

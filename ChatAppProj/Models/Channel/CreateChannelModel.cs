@@ -9,6 +9,6 @@ namespace ChatApp.Models.Channel
     public class CreateChannelModel
     {
         public string Name { get; set; }
-        public int groupId { get; set; }
+        public Guid groupId { get; set; }
     }
 }

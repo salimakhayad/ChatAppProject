@@ -10,15 +10,17 @@ namespace ChatApp.Domain
 {
     public class Chat
     {
-
         public Chat()
         {
+            Messages = new List<Message>();
+            Profiles = new List<Profile>();
         }
-        public string Id { get; set; }
+        [Key]
+        public Guid Id { get; set; }
 
-        [ForeignKey("Channel")]
-        public string ChannelId { get; set; }
-        public Channel Channel { get; set; }
+        [ForeignKey("Group")]
+        public Guid GroupId { get; set; }
+        public virtual Group Group { get; set; }
 
         public ChatType ChatType { get; set; }
         public ICollection<Message> Messages { get; set; }

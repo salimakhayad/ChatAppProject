@@ -3,9 +3,8 @@
 @using ChatApp.Models.Channel;
 
     <div class="flexbox-container">
-        <div class="flexbox-item flexbox-item-1">
-           
-            <form class="chat-input" asp-controller="Channel" asp-action="Create">
+        <div class="flexbox-item">
+            <form class="create-channel-input" asp-controller="Channel" asp-action="CreatePost">
                 @Html.HiddenFor(c => c.groupId)
                 <input type="text" asp-for="@Model.Name" id="message-input" autofocus />
                 <button type="submit"> Create Channel</button>

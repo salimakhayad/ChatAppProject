@@ -9,13 +9,15 @@ namespace ChatApp.Domain
 {
     public class GroupProfile
     {
-        [Key]
-        public string Id { get; set; }
+        public GroupProfile()
+        {
+
+        }
         [ForeignKey("Profile")]
         public string ProfileId { get; set; }
         public virtual Profile Profile { get; set; }
         [ForeignKey("Group")]
-        public string GroupId { get; set; }
+        public Guid GroupId { get; set; }
         public virtual Group Group { get; set; }
       
     }

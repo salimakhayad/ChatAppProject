@@ -1,5 +1,6 @@
 ﻿using ChatApp.Data;
 using ChatApp.Domain;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace ChatApp.Data
             _context = context;
         }
 
-        public void DeleteTimeRegistration(int Id)
+        public void DeleteTimeRegistrationById(int Id)
         {
             var tr = _context.TimeRegistrations.Where(tr => tr.Id == Id).FirstOrDefault();
             if (tr != null)
@@ -25,25 +26,16 @@ namespace ChatApp.Data
         }
         public void DeleteChatById(int Id)
         {
-            var chat = _context.Chats.Where(chat => chat.Id== Id.ToString()).FirstOrDefault();
+            var chat = _context.Chats.Where(chat => chat.Id.ToString() == Id.ToString()).FirstOrDefault();
             if (chat != null)
             {
                 _context.Chats.Remove(chat);
             }
         }
-        public void DeleteTimeRegistrationById(int Id)
-        {
-            var tr = _context.TimeRegistrations.Where(chat => chat.Id == Id).FirstOrDefault();
-            if (tr != null)
-            {
-                _context.TimeRegistrations.Remove(tr);
-            }
-        }
 
-   
         public void DeleteGroupById(int Id)
         {
-            var group = _context.Groups.Where(group => group.Id == Id.ToString()).FirstOrDefault();
+            var group = _context.Groups.Where(group => group.Id.ToString() == Id.ToString()).FirstOrDefault();
             if (group != null)
             {
                 _context.Groups.Remove(group);
@@ -52,20 +44,20 @@ namespace ChatApp.Data
 
         public void DeleteMessageById(int Id)
         {
-            var message = _context.Messages.Where(msg => msg.Id == Id.ToString()).FirstOrDefault();
+            var message = _context.Messages.Where(msg => msg.Id.ToString() == Id.ToString()).FirstOrDefault();
             if (message != null)
             {
                 _context.Messages.Remove(message);
             }
         }
-        public void DeleteGroupProfile(int id)
-        {
-            var gp = _context.GroupProfiles.Where(g => g.Id == id.ToString()).FirstOrDefault();
-            if (gp != null)
-            {
-                _context.GroupProfiles.Remove(gp);
-            }
-        }
+       //public void DeleteGroupProfile(int id)
+       //{
+       //    var gp = _context.GroupProfiles.Where(g => g.Id == id.ToString()).FirstOrDefault();
+       //    if (gp != null)
+       //    {
+       //        _context.GroupProfiles.Remove(gp);
+       //    }
+       //}
         public void DeleteProfileById(int Id)
         {
             var Profile = _context.Profiles.Where(msg => msg.Id == Id.ToString()).FirstOrDefault();
@@ -80,17 +72,17 @@ namespace ChatApp.Data
         }
         public IEnumerable<Chat> GetAllChats()
         {
-            return _context.Chats;
+            return _context.Chats.Include("Group");
         }
 
         public IEnumerable<Group> GetAllGroups()
         {
-            return _context.Groups;
+            return _context.Groups.Include("Profile").Include("Channels");
         }
 
         public IEnumerable<Message> GetAllMessages()
         {
-            return _context.Messages;
+            return _context.Messages.Include("Profile").Include("Chat");
         }
 
        
@@ -103,11 +95,15 @@ namespace ChatApp.Data
 
         public IEnumerable<Channel> GetAllChannels()
         {
-            return _context.Channels;
+            return _context.Channels.Include("Group").Include("Chat");
         }
         public IEnumerable<GroupProfile> GetAllGroupProfiles()
         {
             return _context.GroupProfiles;
+        }
+        public Chat GetChatById(Guid id)
+        {
+            return _context.Chats.Include("Messages").Include("Profiles").FirstOrDefault(c=>c.Id==id);
         }
         public void InsertTimeRegistration(TimeRegistration tr)
         {
@@ -151,8 +147,6 @@ namespace ChatApp.Data
         {
             _context.SaveChanges();
         }
-
-
 
     }
 }
